@@ -25,7 +25,7 @@ def client():
 def test_upload_csv_file(client, temp_upload_dir):
     with open("tests/sample.csv", "rb") as f:
         response = client.post(
-            "/upload-csv/", files={"file": ("sample.csv", f, "text/csv")}
+            "/csv-file/", files={"file": ("sample.csv", f, "text/csv")}
         )
     assert response.status_code == 200
     saved_path = Path(response.json()["path"])
@@ -36,6 +36,6 @@ def test_upload_csv_file(client, temp_upload_dir):
 def test_upload_rejects_non_csv(client):
     fake_file = io.BytesIO(b"some content")
     response = client.post(
-        "/upload-csv/", files={"file": ("not_a_csv.txt", fake_file, "text/plain")}
+        "/csv-file/", files={"file": ("not_a_csv.txt", fake_file, "text/plain")}
     )
     assert response.status_code == 400

@@ -2,6 +2,7 @@ import uuid
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 
 from app.dependencies import get_upload_dir
 
@@ -19,8 +20,8 @@ async def save_uploaded_csv(file: UploadFile, dir: Path):
     return str(path)
 
 
-@app.post("/upload-csv/")
-async def create_upload_csv(
+@app.post("/csv-file/")
+async def upload_csv(
     file: UploadFile = File(...), upload_dir: Path = Depends(get_upload_dir)
 ):
     if not file.filename.endswith(".csv"):
@@ -28,3 +29,13 @@ async def create_upload_csv(
 
     file_path = await save_uploaded_csv(file, dir=upload_dir)
     return {"message": "Success", "path": file_path}
+
+
+@app.get("/csv-file/{filename}")
+async def download_csv(filename: str, upload_dir: Path = Depends(get_upload_dir)):
+    file_path = upload_dir / filename
+
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+
+    return FileResponse(path=file_path, filename=filename, media_type="text/csv")

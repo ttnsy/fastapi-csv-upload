@@ -1,7 +1,7 @@
-from pathlib import Path
+from app.config import UPLOAD_DIR
 
 
 def get_upload_dir():
-    upload_dir = Path(__file__).resolve().parent.parent / "files"
-    upload_dir.mkdir(parents=True, exist_ok=True)
-    return upload_dir
+    if not UPLOAD_DIR.exists():
+        raise RuntimeError(f"{UPLOAD_DIR} does not exist!")
+    return UPLOAD_DIR

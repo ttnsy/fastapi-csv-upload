@@ -6,5 +6,3 @@ __pycache__
 .venv
 .vscode/
 **/*.ipynb
-app/csv_files/*
-!app/csv_files/.gitkeep

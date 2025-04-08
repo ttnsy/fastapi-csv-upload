@@ -1,4 +1,3 @@
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
-UPLOAD_DIR = BASE_DIR / "csv_files"
+UPLOAD_DIR = Path("data")

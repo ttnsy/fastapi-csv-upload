@@ -9,6 +9,11 @@ from app.main import app
 
 
 @pytest.fixture
+def client():
+    return TestClient(app)
+
+
+@pytest.fixture
 def temp_upload_dir():
     with tempfile.TemporaryDirectory() as tmpdir:
         app.dependency_overrides[get_upload_dir] = lambda: Path(tmpdir)
@@ -17,5 +22,10 @@ def temp_upload_dir():
 
 
 @pytest.fixture
-def client():
-    return TestClient(app)
+def upload_csv_path(client):
+    with open("tests/sample.csv", "rb") as f:
+        response = client.post(
+            "/csv-file/", files={"file": ("sample.csv", f, "text/csv")}
+        )
+    assert response.status_code == 200
+    return Path(response.json()["path"])

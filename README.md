@@ -30,7 +30,7 @@ Tests are written with `pytest`, which is already defined in the `pyproject.toml
 To run tests:
 
 ```bash
-pytest
+uv run pytest
 ```
 
 

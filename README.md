@@ -33,4 +33,14 @@ To run tests:
 uv run pytest
 ```
 
+## 📚 API Endpoints
+
+### Upload CSV
+
+- `POST /csv-file/`
+- Accepts: `multipart/form-data`
+- File must be `.csv`
+- Response: metadata info
+
+![alt text](docs/post_csv_file.png)
 

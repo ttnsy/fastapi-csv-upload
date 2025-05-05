@@ -11,4 +11,4 @@ class CSVMetadata(SQLModel, table=True):
     size_bytes: int
     nrows: int
     ncols: int
-    uploaded_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

@@ -1,7 +1,8 @@
 from fastapi import Depends
 from sqlmodel import Session
 
-from .database import engine, get_session
+from .database import engine
+from .dependencies import get_session
 from .models import CSVMetadata
 from .schemas import CSVMetadataCreate
 

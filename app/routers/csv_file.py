@@ -1,15 +1,13 @@
 import os
-import uuid
 from pathlib import Path
 
-import pandas as pd
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
+from sqlmodel import Session
 
 from ..crud import create_metadata
-from ..database import Session, get_session
-from ..dependencies import get_upload_dir
-from ..schemas import CSVMetadataCreate
+from ..dependencies import get_session, get_upload_dir
+from ..utils.csv_files import extract_csv_metadata, save_uploaded_csv
 
 router = APIRouter(
     prefix="/csv-file",
@@ -17,32 +15,6 @@ router = APIRouter(
     dependencies=[Depends(get_upload_dir)],
     responses={404: {"description": "Not found"}},
 )
-
-
-async def save_uploaded_csv(file: UploadFile, dir: Path):
-    name = uuid.uuid4().hex
-    path = dir / name
-
-    content = await file.read()
-    with open(path, "wb") as f:
-        f.write(content)
-
-    return str(path)
-
-
-def extract_csv_metadata(file_path: str, name_original: str):
-    try:
-        df = pd.read_csv(file_path)
-    except Exception as e:
-        raise ValueError(f"Failed to read CSV: {e}")
-
-    return CSVMetadataCreate(
-        name_stored=Path(file_path).name,
-        name_original=name_original,
-        size_bytes=os.path.getsize(file_path),
-        nrows=df.shape[0],
-        ncols=df.shape[1],
-    )
 
 
 @router.post("/")

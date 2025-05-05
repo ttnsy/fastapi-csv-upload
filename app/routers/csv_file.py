@@ -29,7 +29,9 @@ async def upload_csv(
     file_path = await save_uploaded_csv(file, dir=upload_dir)
 
     try:
-        csv_metadata = extract_csv_metadata(file_path, name_original=file.filename)
+        csv_metadata = extract_csv_metadata(
+            file_path, name_original=Path(file.filename).stem
+        )
         metadata = create_metadata(session=session, csv_metadata=csv_metadata)
     except Exception as e:
         if os.path.exists(file_path):

@@ -13,7 +13,7 @@ def test_upload_csv_file(client, sample_csv_path, temp_upload_dir):
 
     metadata = res["metadata"]
     assert "name_stored" in metadata
-    assert metadata["name_original"] == "sample.csv"
+    assert metadata["name_original"] == "sample"
     assert metadata["nrows"] == 5
     assert metadata["ncols"] == 5
 

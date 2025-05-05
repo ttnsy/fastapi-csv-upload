@@ -28,8 +28,8 @@ def test_extract_csv_metadata(sample_csv_path):
     metadata = extract_csv_metadata(str(sample_csv_path), name_original="new_file.csv")
 
     assert isinstance(metadata, CSVMetadataCreate)
-    assert metadata.name_stored == "sample.csv"
-    assert metadata.name_original == "new_file.csv"
+    assert metadata.name_stored == "sample"
+    assert metadata.name_original == "new_file"
     assert metadata.nrows == 5
     assert metadata.ncols == 5
     assert metadata.size_bytes == os.path.getsize(sample_csv_path)

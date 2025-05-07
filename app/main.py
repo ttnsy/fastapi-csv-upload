@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from sqlmodel import SQLModel
 
-from .database import engine
-from .routers import csv_file
+from app.database import engine
+from app.routers import csv_file
 
 
 @asynccontextmanager

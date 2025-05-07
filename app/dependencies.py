@@ -1,8 +1,7 @@
 from sqlmodel import Session
 
 from app.config import UPLOAD_DIR
-
-from .database import engine
+from app.database import engine
 
 
 def get_session():

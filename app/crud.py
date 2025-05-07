@@ -1,10 +1,10 @@
 from fastapi import Depends
 from sqlmodel import Session
 
-from .database import engine
-from .dependencies import get_session
-from .models import CSVMetadata
-from .schemas import CSVMetadataCreate
+from app.database import engine
+from app.dependencies import get_session
+from app.models import CSVMetadata
+from app.schemas import CSVMetadataCreate
 
 
 def create_metadata(

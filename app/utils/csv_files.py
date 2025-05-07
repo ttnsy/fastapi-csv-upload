@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 from fastapi import UploadFile
 
-from ..schemas import CSVMetadataCreate
+from app.schemas import CSVMetadataCreate
 
 
 async def save_uploaded_csv(file: UploadFile, dir: Path):

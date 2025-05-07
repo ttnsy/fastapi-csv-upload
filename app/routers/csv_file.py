@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from sqlmodel import Session
 
-from ..crud import create_metadata
-from ..dependencies import get_session, get_upload_dir
-from ..utils.csv_files import extract_csv_metadata, save_uploaded_csv
+from app.crud import create_metadata
+from app.dependencies import get_session, get_upload_dir
+from app.utils.csv_files import extract_csv_metadata, save_uploaded_csv
 
 router = APIRouter(
     prefix="/csv-file",

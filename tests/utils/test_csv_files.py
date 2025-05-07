@@ -25,7 +25,7 @@ async def test_save_uploaded_csv(tmp_path, sample_csv_path):
 
 
 def test_extract_csv_metadata(sample_csv_path):
-    metadata = extract_csv_metadata(str(sample_csv_path), name_original="new_file.csv")
+    metadata = extract_csv_metadata(str(sample_csv_path), name_original="new_file")
 
     assert isinstance(metadata, CSVMetadataCreate)
     assert metadata.name_stored == "sample"

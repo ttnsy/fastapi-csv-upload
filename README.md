@@ -33,4 +33,9 @@ To run tests:
 uv run pytest
 ```
 
+## 📚 API Endpoints
 
+Full interactive API docs are available at:
+
+- [http://localhost:8000/docs](http://localhost:8000/docs) – Swagger UI
+- [http://localhost:8000/redoc](http://localhost:8000/redoc) – ReDoc

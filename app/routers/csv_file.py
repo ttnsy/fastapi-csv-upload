@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -34,8 +33,8 @@ async def upload_csv(
         )
         metadata = create_metadata(session=session, csv_metadata=csv_metadata)
     except Exception as e:
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        if file_path.exists():
+            file_path.unlink()
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
     return {"message": "Success", "metadata": metadata}

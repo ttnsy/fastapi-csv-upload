@@ -1,7 +1,6 @@
 import os
-import re
+import uuid
 from io import BytesIO
-from pathlib import Path
 
 import pytest
 from fastapi import UploadFile
@@ -16,16 +15,14 @@ async def test_save_uploaded_csv(tmp_path, sample_csv_path):
     uploaded_csv = UploadFile(filename="sample.csv", file=BytesIO(sample_csv))
 
     saved_path = await save_uploaded_csv(uploaded_csv, dir=tmp_path)
-    saved_filename = Path(saved_path).name
+    saved_filename = saved_path.stem
 
-    assert Path(saved_path).exists()
-    assert re.fullmatch(r"^[a-f0-9]{32}$", saved_filename), (
-        f"Invalid UUID format: {saved_filename}"
-    )
+    assert saved_path.exists()
+    assert str(uuid.UUID(saved_filename)) == saved_filename
 
 
 def test_extract_csv_metadata(sample_csv_path):
-    metadata = extract_csv_metadata(str(sample_csv_path), name_original="new_file")
+    metadata = extract_csv_metadata(sample_csv_path, name_original="new_file")
 
     assert isinstance(metadata, CSVMetadataCreate)
     assert metadata.name_stored == "sample"

@@ -35,12 +35,7 @@ uv run pytest
 
 ## 📚 API Endpoints
 
-### Upload CSV
+Full interactive API docs are available at:
 
-- `POST /csv-file/`
-- Accepts: `multipart/form-data`
-- File must be `.csv`
-- Response: metadata info
-
-![alt text](docs/post_csv_file.png)
-
+- [http://localhost:8000/docs](http://localhost:8000/docs) – Swagger UI
+- [http://localhost:8000/redoc](http://localhost:8000/redoc) – ReDoc

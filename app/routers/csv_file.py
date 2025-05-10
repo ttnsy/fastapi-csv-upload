@@ -1,26 +1,24 @@
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
-from sqlmodel import Session
 
 from app.crud import create_metadata
-from app.dependencies import get_session, get_upload_dir
+from app.dependencies import SessionDep, UploadDirDep
 from app.utils.csv_files import extract_csv_metadata, save_uploaded_csv
 
 router = APIRouter(
     prefix="/csv-file",
     tags=["CSV files"],
-    dependencies=[Depends(get_upload_dir)],
     responses={404: {"description": "Not found"}},
 )
 
 
 @router.post("/")
 async def upload_csv(
+    session: SessionDep,
+    upload_dir: UploadDirDep,
     file: UploadFile = File(...),
-    upload_dir: Path = Depends(get_upload_dir),
-    session: Session = Depends(get_session),
 ):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only accept .csv")
@@ -41,7 +39,7 @@ async def upload_csv(
 
 
 @router.get("/{filename}")
-async def download_csv(filename: str, upload_dir: Path = Depends(get_upload_dir)):
+async def download_csv(filename: str, upload_dir: UploadDirDep):
     file_path = upload_dir / filename
 
     if not file_path.exists():

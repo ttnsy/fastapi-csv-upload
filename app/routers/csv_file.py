@@ -1,43 +1,45 @@
-import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from ..dependencies import get_upload_dir
+from app.crud import create_metadata
+from app.dependencies import SessionDep, UploadDirDep
+from app.utils.csv_files import extract_csv_metadata, save_uploaded_csv
 
 router = APIRouter(
     prefix="/csv-file",
     tags=["CSV files"],
-    dependencies=[Depends(get_upload_dir)],
     responses={404: {"description": "Not found"}},
 )
 
 
-async def save_uploaded_csv(file: UploadFile, dir: Path):
-    name = f"{uuid.uuid4()}_{file.filename}"
-    path = dir / name
-
-    content = await file.read()
-    with open(path, "wb") as f:
-        f.write(content)
-
-    return str(path)
-
-
 @router.post("/")
 async def upload_csv(
-    file: UploadFile = File(...), upload_dir: Path = Depends(get_upload_dir)
+    session: SessionDep,
+    upload_dir: UploadDirDep,
+    file: UploadFile = File(...),
 ):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only accept .csv")
 
     file_path = await save_uploaded_csv(file, dir=upload_dir)
-    return {"message": "Success", "path": file_path}
+
+    try:
+        csv_metadata = extract_csv_metadata(
+            file_path, name_original=Path(file.filename).stem
+        )
+        metadata = create_metadata(session=session, csv_metadata=csv_metadata)
+    except Exception as e:
+        if file_path.exists():
+            file_path.unlink()
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+    return {"message": "Success", "metadata": metadata}
 
 
 @router.get("/{filename}")
-async def download_csv(filename: str, upload_dir: Path = Depends(get_upload_dir)):
+async def download_csv(filename: str, upload_dir: UploadDirDep):
     file_path = upload_dir / filename
 
     if not file_path.exists():

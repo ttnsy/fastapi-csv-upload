@@ -19,3 +19,8 @@ def temp_upload_dir():
 @pytest.fixture
 def client():
     return TestClient(app)
+
+
+@pytest.fixture
+def sample_csv_path() -> Path:
+    return Path("tests/sample.csv")

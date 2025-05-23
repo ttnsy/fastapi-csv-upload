@@ -20,4 +20,4 @@ def get_upload_dir() -> Path:
 
 
 SessionDep = Annotated[Session, Depends(get_session)]
-UploadDirDep = Annotated[Session, Depends(get_upload_dir)]
+UploadDirDep = Annotated[Path, Depends(get_upload_dir)]

@@ -3,9 +3,15 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlmodel import SQLModel
 
 from app.dependencies import get_upload_dir
 from app.main import app
+
+
+@pytest.fixture(scope="session", autouse=True)
+def create_test_tables(engine):
+    SQLModel.metadata.create_all(engine)
 
 
 @pytest.fixture

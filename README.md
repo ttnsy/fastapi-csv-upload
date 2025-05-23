@@ -30,7 +30,12 @@ Tests are written with `pytest`, which is already defined in the `pyproject.toml
 To run tests:
 
 ```bash
-pytest
+uv run pytest
 ```
 
+## 📚 API Endpoints
 
+Full interactive API docs are available at:
+
+- [http://localhost:8000/docs](http://localhost:8000/docs) – Swagger UI
+- [http://localhost:8000/redoc](http://localhost:8000/redoc) – ReDoc

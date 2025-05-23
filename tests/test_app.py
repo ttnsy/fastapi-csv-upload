@@ -1,7 +1,7 @@
 import io
 
 
-def test_upload_csv_file(client, sample_csv_path, temp_upload_dir):
+def test_upload_csv_file(client, sample_csv_path, tmp_path):
     with sample_csv_path.open("rb") as f:
         response = client.post(
             "/csv-file/", files={"file": ("sample.csv", f, "text/csv")}
@@ -17,7 +17,7 @@ def test_upload_csv_file(client, sample_csv_path, temp_upload_dir):
     assert metadata["nrows"] == 5
     assert metadata["ncols"] == 5
 
-    saved_path = temp_upload_dir / metadata["name_stored"]
+    saved_path = tmp_path / metadata["name_stored"]
     assert saved_path.exists()
 
 

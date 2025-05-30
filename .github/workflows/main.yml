@@ -27,8 +27,8 @@ jobs:
      - name: Run Ruff (linting)
        uses: astral-sh/ruff-action@v3
 
-     - name: Run mypy (type checking)
-       run: uv run mypy app/
-
      - name: Run pytest (unit tests)
        run: uv run pytest
+
+     - name: Run mypy (type checking)
+       run: uv run mypy app/

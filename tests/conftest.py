@@ -1,9 +1,11 @@
+import os
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session
 
+from app.database import engine, init_db
 from app.dependencies import get_session, get_upload_dir
 from app.main import app
 
@@ -11,22 +13,18 @@ from app.main import app
 # DATABASE SETUP
 # -------------------------------------------------------------
 
-# Create a temporary SQLite database for testing
-test_engine = create_engine(
-    "sqlite:///./test.db", connect_args={"check_same_thread": False}
-)
-
 
 @pytest.fixture(scope="session", autouse=True)
-def create_test_tables():
-    SQLModel.metadata.create_all(test_engine)
+def setup_test_db():
+    os.environ["DB_PATH"] = "test.db"
+    init_db()
     yield
-    SQLModel.metadata.drop_all(test_engine)
+    Path("test.db").unlink(missing_ok=True)
 
 
 @pytest.fixture
 def session():
-    with Session(test_engine) as session:
+    with Session(engine) as session:
         yield session
 
 

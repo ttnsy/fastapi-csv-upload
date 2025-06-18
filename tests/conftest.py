@@ -16,10 +16,9 @@ from app.main import app
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_db():
-    os.environ["DB_PATH"] = "test.db"
     init_db()
     yield
-    Path("test.db").unlink(missing_ok=True)
+    Path(os.getenv("DB_PATH")).unlink(missing_ok=True)
 
 
 @pytest.fixture

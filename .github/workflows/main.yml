@@ -27,6 +27,9 @@ jobs:
      - name: Run Ruff (linting)
        uses: astral-sh/ruff-action@v3
 
+     - name: Run Alembic migrations
+       run: alembic upgrade head
+
      - name: Run pytest (unit tests)
        run: uv run pytest
 

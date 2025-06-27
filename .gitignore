@@ -1,8 +1,10 @@
 .DS_Store
 *.pyc
 __pycache__
+alembic/__pycache__/
 .env
 *.db
 .venv
 .vscode/
 **/*.ipynb
+alembic/script.py.mako

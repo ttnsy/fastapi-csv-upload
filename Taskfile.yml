@@ -1,0 +1,34 @@
+version: '3'
+
+env:
+  DB_PATH: "database.db"
+
+tasks:
+  check-uv:
+    silent: true
+    cmds:
+      - |
+        if ! command -v uv &> /dev/null; then
+          echo "🔧 Installing uv..."
+          curl -Ls https://astral.sh/uv/install.sh | sh
+        fi
+
+  setup:
+    desc: Initial project setup
+    deps: [check-uv]
+    cmds:
+      - uv sync && alembic upgrade head
+
+  dev:
+    desc: Run FastAPI dev server
+    cmds:
+      - alembic upgrade head && uv run fastapi dev
+  
+  test:
+    desc: Run tests
+    env:
+      DB_PATH: "test.db"
+    cmds:
+      - alembic upgrade head && uv run pytest -vvs
+
+  

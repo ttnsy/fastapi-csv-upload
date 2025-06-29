@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, create_engine
+from sqlmodel import create_engine
 
 from app.config import settings
 
@@ -10,5 +10,4 @@ engine = create_engine(
 
 def init_db():
     print(f"[DEBUG] Using database path: {settings.db_path}")
-    SQLModel.metadata.create_all(engine)
     return engine

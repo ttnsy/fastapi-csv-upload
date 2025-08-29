@@ -7,4 +7,3 @@ alembic/__pycache__/
 .venv
 .vscode/
 **/*.ipynb
-alembic/script.py.mako

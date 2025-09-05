@@ -28,7 +28,7 @@ tasks:
       - uv run alembic downgrade -1
 
   migrate:
-    desc: Create a new Alembic migration
+    desc: 'Create a new Alembic migration (to use: task migrate -- "message")'
     cmds:
       - uv run alembic revision --autogenerate -m "{{.CLI_ARGS}}"
 

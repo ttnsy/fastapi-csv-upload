@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
-from app.database import engine, init_db
+from app.database import engine
 from app.dependencies import get_session, get_upload_dir
 from app.main import app
 
@@ -16,7 +16,6 @@ from app.main import app
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_db():
-    init_db()
     yield
     Path(os.getenv("DB_PATH")).unlink(missing_ok=True)
 

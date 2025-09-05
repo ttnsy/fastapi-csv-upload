@@ -43,8 +43,5 @@ tasks:
 
   test:
     desc: Run tests with separate DB
-    env:
-      DB_PATH: "test.db"
-    deps: [upgrade]
     cmds:
       - uv run pytest -vvs

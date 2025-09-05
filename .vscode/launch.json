@@ -11,20 +11,6 @@
       "module": "uvicorn",
       "args": ["app.main:app", "--reload"],
       "jinja": true
-    },
-    {
-      "name": "Debug Pytest",
-      "type": "python",
-      "request": "launch",
-      "module": "pytest",
-      "args": [
-        "-vvs",
-        "tests"
-      ],
-      "env": {
-        "DB_PATH": "sqlite:///./test.db"
-      },
-      "justMyCode": true
     }
   ]
 }

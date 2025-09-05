@@ -15,20 +15,33 @@ tasks:
 
   setup:
     desc: Initial project setup
-    deps: [check-uv]
+    deps: [check-uv, upgrade]
+
+  upgrade:
+    desc: Apply all migrations
     cmds:
-      - uv sync && alembic upgrade head
+      - uv run alembic upgrade head
+
+  downgrade:
+    desc: Revert last migration
+    cmds:
+      - uv run alembic downgrade -1
+
+  migrate:
+    desc: Create a new Alembic migration
+    cmds:
+      - uv run alembic revision --autogenerate -m "{{.CLI_ARGS}}"
 
   dev:
     desc: Run FastAPI dev server
+    deps: [upgrade]
     cmds:
-      - alembic upgrade head && uv run fastapi dev
-  
+      - uv run fastapi dev
+
   test:
-    desc: Run tests
+    desc: Run tests with separate DB
     env:
       DB_PATH: "test.db"
+    deps: [upgrade]
     cmds:
-      - alembic upgrade head && uv run pytest -vvs
-
-  
+      - uv run pytest -vvs

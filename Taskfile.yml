@@ -20,8 +20,6 @@ tasks:
   upgrade:
     desc: Apply all migrations
       - uv run alembic upgrade head
-    env:
-      DB_PATH: "test.db"
     cmds:
       - uv run alembic upgrade head
 

@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import pytest
+import alembic.config
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
@@ -16,6 +17,7 @@ from app.main import app
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_db():
+    alembic.config.main(argv=["--raiseerr", "upgrade", "head"])
     yield
     Path(os.getenv("DB_PATH")).unlink(missing_ok=True)
 

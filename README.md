@@ -2,35 +2,36 @@
 
 A FastAPI-based service that lets users upload, store, and download CSV files.
 
-## 🚀 Run the App
- 
-This project is managed with [`uv`](https://github.com/astral-sh/uv), a Python package manager that handles isolated environments automatically. To initialize the project, make sure you have `uv` installed:
 
- ```bash
-# Install uv (if needed)
-curl -Ls https://astral.sh/uv/install.sh | sh
+This project is built with:
+
+- [FastAPI](https://fastapi.tiangolo.com/) – for the web API
+- [uv](https://github.com/astral-sh/uv) – for Python dependency and environment management
+- [Alembic](https://alembic.sqlalchemy.org/) – for database migrations
+- [Taskfile](https://taskfile.dev/) – to simplify common commands (like setup, running, and testing)
+
+> ‼️ **You don’t need to worry about installing or configuring those manually** as Taskfile takes care of everything for you
+>  👉 Follow the steps in [🚀 Getting Started](#getting-started)
+
+## 🚀 Getting Started
+
+- ✅ 1. Install Task (if you haven’t already). Installation guide → [https://taskfile.dev/installation](https://taskfile.dev/installation)
+- ✅ 2. Run setup to install all dependencies and prepares database:
+```bash
+task setup
 ```
-
-Then, restore dependencies with:
+- ✅ Once the project is initialized, you can run the app with:
 
 ```bash
-uv sync
-```
-
-Once the project is initialized, you can run the app with:
-
-```bash
-uv run fastapi dev
+task dev
 ```
 
 ### 🧪 Run Tests
 
-Tests are written with `pytest`, which is already defined in the `pyproject.toml`.
-
-To run tests:
+Tests are written with `pytest` and can be run with:
 
 ```bash
-uv run pytest
+task test
 ```
 
 ## 📚 API Endpoints

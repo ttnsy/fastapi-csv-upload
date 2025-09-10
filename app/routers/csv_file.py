@@ -20,6 +20,9 @@ async def upload_csv(
     upload_dir: UploadDirDep,
     file: UploadFile = File(...),
 ):
+    if file.filename is None:
+        raise HTTPException(status_code=400, detail="Filename is missing")
+
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only accept .csv")
 

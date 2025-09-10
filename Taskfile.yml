@@ -1,0 +1,45 @@
+version: '3'
+
+env:
+  DB_PATH: "database.db"
+
+tasks:
+  check-uv:
+    silent: true
+    cmds:
+      - |
+        if ! command -v uv &> /dev/null; then
+          echo "🔧 Installing uv..."
+          curl -Ls https://astral.sh/uv/install.sh | sh
+        fi
+
+  setup:
+    desc: Initial project setup
+    deps: [check-uv, upgrade]
+
+  upgrade:
+    desc: Apply all migrations
+      - uv run alembic upgrade head
+    cmds:
+      - uv run alembic upgrade head
+
+  downgrade:
+    desc: Revert last migration
+    cmds:
+      - uv run alembic downgrade -1
+
+  migrate:
+    desc: 'Create a new Alembic migration (to use: task migrate -- "message")'
+    cmds:
+      - uv run alembic revision --autogenerate -m "{{.CLI_ARGS}}"
+
+  dev:
+    desc: Run FastAPI dev server
+    deps: [upgrade]
+    cmds:
+      - uv run fastapi dev
+
+  test:
+    desc: Run tests with separate DB
+    cmds:
+      - uv run pytest -vvs

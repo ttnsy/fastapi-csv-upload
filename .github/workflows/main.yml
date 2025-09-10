@@ -1,0 +1,36 @@
+name: CI
+
+on:
+    push:
+      branches:
+        - '**'
+    pull_request:
+      branches: [main]
+
+jobs:
+  check:
+    name: Lint, Type Check, and Test
+    runs-on: ubuntu-latest
+
+    steps:
+     - uses: actions/checkout@v4
+     
+     - name: Install uv
+       uses: astral-sh/setup-uv@v5
+       
+     - name: Set up Python
+       run: uv python install
+
+     - name: Install the project
+       run: uv sync --locked --all-extras --dev
+
+     - name: Run Ruff (linting)
+       uses: astral-sh/ruff-action@v3
+
+     - name: Run pytest (unit tests)
+       env:
+        DB_PATH: test.db
+       run: uv run alembic upgrade head && uv run pytest
+
+     - name: Run mypy (type checking)
+       run: uv run mypy app/

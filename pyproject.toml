@@ -5,10 +5,14 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "alembic>=1.16.2",
     "fastapi[standard]>=0.115.12",
+    "mypy>=1.15.0",
     "pandas>=2.2.3",
+    "pandas-stubs>=2.2.3.250308",
     "pydantic-settings>=2.8.1",
     "pytest-asyncio>=0.26.0",
+    "pytest-env>=1.1.5",
     "sqlmodel>=0.0.24",
 ]
 
@@ -16,4 +20,10 @@ dependencies = [
 dev = [
     "ipykernel>=6.29.5",
     "pytest>=8.3.5",
+]
+
+[tool.pytest.ini_options]
+addopts = ["-vvs"]
+env = [
+    "DB_PATH=test.db",
 ]

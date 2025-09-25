@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 
+from app.constants import LOG_MSG_TEMPLATE
 from app.routers import csv_file
 
 
@@ -32,7 +33,9 @@ async def add_process_time_header(request: Request, call_next):
     response = await call_next(request)
     process_time = time.perf_counter() - start_time
     logger.info(
-        f"{request.method} {request.url.path} completed in {process_time:.2f} ms"
+        LOG_MSG_TEMPLATE.format(
+            method=request.method, path=request.url.path, duration=process_time
+        )
     )
     return response
 

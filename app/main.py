@@ -1,25 +1,15 @@
-import json
-import logging
-import logging.config
 import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 
-from app.constants import LOG_MSG_TEMPLATE
 from app.routers import csv_file
+from logger import logger_telemetry
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
-
-
-with open("logging.json", "r") as f:
-    config = json.load(f)
-    logging.config.dictConfig(config)
-
-logger = logging.getLogger(__name__)
 
 
 app = FastAPI(lifespan=lifespan)
@@ -32,10 +22,14 @@ async def add_process_time_header(request: Request, call_next):
     start_time = time.perf_counter()
     response = await call_next(request)
     process_time = time.perf_counter() - start_time
-    logger.info(
-        LOG_MSG_TEMPLATE.format(
-            method=request.method, path=request.url.path, duration=process_time
-        )
+    logger_telemetry.info(
+        "request_timing",
+        extra={
+            "method": request.method,
+            "path": request.url.path,
+            "status_code": response.status_code,
+            "duration_ms": round(process_time, 2),
+        },
     )
     return response
 

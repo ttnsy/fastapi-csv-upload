@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
@@ -7,8 +6,7 @@ from fastapi.responses import FileResponse
 from app.crud import create_metadata
 from app.dependencies import SessionDep, UploadDirDep
 from app.utils.csv_files import extract_csv_metadata, save_uploaded_csv
-
-logger = logging.getLogger(__name__)
+from logger import logger
 
 router = APIRouter(
     prefix="/csv-file",

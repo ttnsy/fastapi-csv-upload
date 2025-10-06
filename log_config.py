@@ -1,9 +1,9 @@
 import json
-import logging
 from datetime import datetime
+from logging import Formatter, config, getLogger
 
 
-class JsonFormatter(logging.Formatter):
+class JsonFormatter(Formatter):
     def format(self, record):
         log_record = {
             "timestamp": datetime.utcnow().isoformat(),
@@ -63,7 +63,7 @@ LOG_CONFIG = {
     "root": {"level": "DEBUG", "handlers": ["stream", "file"]},
 }
 
-logging.config.dictConfig(LOG_CONFIG)
+config.dictConfig(LOG_CONFIG)
 
-logger = logging.getLogger("app")
-logger_telemetry = logging.getLogger("telemetry")
+logger = getLogger("app")
+logger_telemetry = getLogger("telemetry")

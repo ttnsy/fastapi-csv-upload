@@ -6,4 +6,3 @@ alembic/__pycache__/
 *.db
 .venv
 **/*.ipynb
-logs/

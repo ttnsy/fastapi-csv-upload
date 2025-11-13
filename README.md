@@ -46,5 +46,5 @@ Full interactive API docs are available at:
 A helper script is included to analyze performance telemetry logs saved by the app. By default, the script reads all `.jsonl` log files in the `logs/` directory and compute request count and average processing time per endpoint. Run the script directly from the project root:
 
 ```bash
-python log_telemetry_stats.py
+uv run log_telemetry_stats.py
 ```

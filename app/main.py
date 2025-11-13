@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 
+from app.log_config import logger_telemetry
 from app.routers import csv_file
-from log_config import logger_telemetry
 
 
 @asynccontextmanager

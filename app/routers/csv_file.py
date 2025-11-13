@@ -5,8 +5,8 @@ from fastapi.responses import FileResponse
 
 from app.crud import create_metadata
 from app.dependencies import SessionDep, UploadDirDep
+from app.log_config import logger
 from app.utils.csv_files import extract_csv_metadata, save_uploaded_csv
-from log_config import logger
 
 router = APIRouter(
     prefix="/csv-file",

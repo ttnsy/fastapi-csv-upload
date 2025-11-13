@@ -1,34 +1,49 @@
+import io
 import os
 import uuid
 from pathlib import Path
 
-import pandas as pd
-from fastapi import UploadFile
+import pyarrow.csv as csv
+import pyarrow.parquet as pq
+from fastapi import HTTPException, UploadFile
+from sqlmodel import Session
 
+from app.crud import create_metadata
+from app.log_config import logger
 from app.schemas import CSVMetadataCreate
 
 
-async def save_uploaded_csv(file: UploadFile, dir: Path) -> Path:
+async def save_uploaded_csv(
+    file: UploadFile, session: Session, dir: Path
+) -> CSVMetadataCreate:
     name = str(uuid.uuid4())
-    path = dir / name
+    path = (dir / name).with_suffix(".parquet")
 
     content = await file.read()
-    with open(path, "wb") as f:
-        f.write(content)
+    table = csv.read_csv(io.BytesIO(content))
 
-    return path
-
-
-def extract_csv_metadata(file_path: Path, name_original: str):
     try:
-        df = pd.read_csv(file_path)
+        pq.write_table(table, path)
     except Exception as e:
-        raise ValueError(f"Failed to read CSV: {e}")
+        logger.error(f"Failed to write parquet file: {e}")
+        raise
 
-    return CSVMetadataCreate(
-        name_stored=file_path.stem,
-        name_original=name_original,
-        size_bytes=os.path.getsize(file_path),
-        nrows=df.shape[0],
-        ncols=df.shape[1],
+    metadata = CSVMetadataCreate(
+        name_stored=path.stem,
+        name_original=file.filename,
+        size_bytes=os.path.getsize(path),
+        nrows=table.shape[0],
+        ncols=table.shape[1],
     )
+
+    try:
+        create_metadata(session=session, csv_metadata=metadata)
+    except Exception:
+        logger.exception(
+            "Metadata insert failed, cleaning up parquet file",
+            extra={"stored_path": str(path)},
+        )
+        path.unlink(missing_ok=True)
+        raise HTTPException(status_code=500, detail="Failed to save metadata")
+
+    return metadata

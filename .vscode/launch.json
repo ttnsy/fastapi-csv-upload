@@ -10,7 +10,10 @@
       "request": "launch",
       "module": "uvicorn",
       "args": ["app.main:app", "--reload"],
-      "jinja": true
+      "jinja": true,
+      "env": {
+        "DB_PATH": "database.db"
+      }
     }
   ]
 }

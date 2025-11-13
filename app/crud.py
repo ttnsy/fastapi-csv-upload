@@ -10,4 +10,3 @@ def create_metadata(session: Session, csv_metadata: CSVMetadataCreate):
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
-    return csv_metadata

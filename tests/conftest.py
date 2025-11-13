@@ -1,14 +1,23 @@
+import logging
 import os
 from pathlib import Path
 
-import pytest
 import alembic.config
+import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.database import engine
 from app.dependencies import get_session, get_upload_dir
 from app.main import app
+
+
+@pytest.fixture(scope="session", autouse=True)
+def disable_logging():
+    logging.disable(logging.CRITICAL)
+    yield
+    logging.disable(logging.NOTSET)
+
 
 # -------------------------------------------------------------
 # DATABASE SETUP

@@ -266,6 +266,7 @@ dependencies = [
     { name = "pytest-asyncio" },
     { name = "pytest-env" },
     { name = "sqlmodel" },
+    { name = "uvicorn" },
 ]
 
 [package.dev-dependencies]
@@ -285,6 +286,7 @@ requires-dist = [
     { name = "pytest-asyncio", specifier = ">=0.26.0" },
     { name = "pytest-env", specifier = ">=1.1.5" },
     { name = "sqlmodel", specifier = ">=0.0.24" },
+    { name = "uvicorn", specifier = ">=0.34.0" },
 ]
 
 [package.metadata.requires-dev]

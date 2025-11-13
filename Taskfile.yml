@@ -37,7 +37,7 @@ tasks:
     desc: Run FastAPI dev server
     deps: [upgrade]
     cmds:
-      - uv run fastapi dev
+      - uv run uvicorn app.main:app --reload
 
   test:
     desc: Run tests with separate DB

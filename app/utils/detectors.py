@@ -1,87 +1,112 @@
+import re
+from typing import List, Optional
+
 import pandas as pd
 import pyarrow as pa
 from fastapi import HTTPException
+from sqlalchemy import Table
+
+ID_KEY = "id"
+VALUE_KEY = "value"
+DATE_KEYS = ["date", "day", "time", "timestamp", "datetime", "dttm"]
 
 
-def get_idx_id(table) -> int | None:
-    cols = []
+def norm(name: str) -> List[str]:
+    name = str(name).lower().strip()
+    return re.split(r"[^a-z0-9]+", name)
 
-    for idx, field in enumerate(table.schema):
-        col_type = field.type
-        if not (pa.types.is_integer(col_type) or pa.types.is_string(col_type)):
+
+def find_by_name(
+    table: Table,
+    keys: List[str],
+    *,
+    exclude: Optional[int] = None,
+) -> List[int]:
+    cols: List[int] = []
+    for idx, name in enumerate(table.column_names):
+        if exclude is not None and idx == exclude:
             continue
-        ser = table[idx].to_pandas()
-        if ser.empty:
-            continue
-        if ser.is_unique:
+        tokens = norm(name)
+        if any(k in tokens for k in keys):
             cols.append(idx)
+    return cols
 
+
+def resolve(cols: List[int], table: Table, label: str) -> Optional[int]:
     if len(cols) > 1:
         raise HTTPException(
             status_code=400,
-            detail=f"CSV has multiple ID columns: "
-            f"{[table.column_names[i] for i in cols]}",
+            detail=f"Multiple {label}-like columns: {[table.column_names[i] for i in cols]}",
         )
-
     if len(cols) == 1:
         return cols[0]
-
     return None
 
 
-def get_idx_value(table, id_idx: int | None) -> int | None:
-    cols = []
+def get_idx_id(table: Table) -> Optional[int]:
+    cols_n = find_by_name(table, [ID_KEY])
+    res = resolve(cols_n, table, "ID")
+    if res is not None:
+        return res
+
+    cols_t: List[int] = []
+    for idx, field in enumerate(table.schema):
+        t = field.type
+
+        if pa.types.is_integer(t) or pa.types.is_string(t):
+            ser = table[idx].to_pandas()
+
+            if not ser.empty and ser.is_unique:
+                cols_t.append(idx)
+
+    return resolve(cols_t, table, "ID")
+
+
+def get_idx_value(table: Table, id_idx: Optional[int]) -> Optional[int]:
+    cols_n = find_by_name(table, [VALUE_KEY], exclude=id_idx)
+    res = resolve(cols_n, table, "VALUE")
+    if res is not None:
+        return res
+
+    cols_t: List[int] = []
     for idx, field in enumerate(table.schema):
         if idx == id_idx:
             continue
-        col_type = field.type
-        if not (pa.types.is_integer(col_type) or pa.types.is_floating(col_type)):
-            continue
-        ser = table[idx].to_pandas()
-        if ser.empty:
-            continue
-        cols.append(idx)
 
-    if len(cols) > 1:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Multiple VALUE-like columns detected: "
-            f"{[table.column_names[i] for i in cols]}",
-        )
-    if len(cols) == 1:
-        return cols[0]
-    return None
+        t = field.type
+        if pa.types.is_integer(t) or pa.types.is_floating(t):
+            ser = table[idx].to_pandas()
+
+            if not ser.empty:
+                cols_t.append(idx)
+
+    return resolve(cols_t, table, "VALUE")
 
 
-def get_idx_date(table) -> int | None:
-    cols = []
-    for idx, field in enumerate(table.schema):
-        if pa.types.is_date(field.type) or pa.types.is_timestamp(field.type):
-            cols.append(idx)
-    if len(cols) > 1:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Multiple date columns detected: {[table.column_names[i] for i in cols]}",
-        )
-    if len(cols) == 1:
-        return cols[0]
+def get_idx_date(table: Table) -> Optional[int]:
+    cols_n = find_by_name(table, DATE_KEYS)
+    res = resolve(cols_n, table, "DATE")
+    if res is not None:
+        return res
 
+    cols_t: List[int] = [
+        idx
+        for idx, field in enumerate(table.schema)
+        if pa.types.is_date(field.type) or pa.types.is_timestamp(field.type)
+    ]
+    res = resolve(cols_t, table, "DATE")
+    if res is not None:
+        return res
+
+    cols_p: List[int] = []
     for idx, name in enumerate(table.column_names):
         arr = table[name]
-        if not pa.types.is_string(arr.type):
-            continue
-        ser = arr.to_pandas()
-        parsed = pd.to_datetime(ser, format="mixed", errors="coerce")
-        if parsed.notna().any():
-            cols.append(idx)
 
-    if len(cols) > 1:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Multiple date columns detected: {[table.column_names[i] for i in cols]}",
-        )
+        if pa.types.is_string(arr.type):
+            ser = arr.to_pandas()
 
-    if len(cols) == 1:
-        return cols[0]
+            parsed = pd.to_datetime(ser, errors="coerce", format="mixed")
+            if parsed.notna().any():
+                cols_p.append(idx)
 
-    return None
+    return resolve(cols_p, table, "DATE")

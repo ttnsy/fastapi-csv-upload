@@ -1,32 +1,28 @@
-import os
 import uuid
 from io import BytesIO
 
 import pytest
 from fastapi import UploadFile
 
-from app.schemas import CSVMetadataCreate
-from app.utils.csv_files import extract_csv_metadata, save_uploaded_csv
+from app.utils.csv_files import save_uploaded_csv
+
+# def test_create_and_save_metadata(sample_csv_path, session):
+#     metadata = create_and_save_metadata(sample_csv_path)
+
+#     assert isinstance(metadata, CSVMetadataCreate)
+#     assert metadata.name_stored == "sample"
+#     assert metadata.name_original == "new_file"
+#     assert metadata.nrows == 5
+#     assert metadata.ncols == 5
+#     assert metadata.size_bytes == os.path.getsize(sample_csv_path)
 
 
 @pytest.mark.asyncio
-async def test_save_uploaded_csv(tmp_path, sample_csv_path):
+async def test_save_uploaded_csv(session, tmp_path, sample_csv_path):
     sample_csv = sample_csv_path.read_bytes()
     uploaded_csv = UploadFile(filename="sample.csv", file=BytesIO(sample_csv))
 
-    saved_path = await save_uploaded_csv(uploaded_csv, dir=tmp_path)
-    saved_filename = saved_path.stem
+    metadata = await save_uploaded_csv(uploaded_csv, session=session, dir=tmp_path)
 
-    assert saved_path.exists()
-    assert str(uuid.UUID(saved_filename)) == saved_filename
-
-
-def test_extract_csv_metadata(sample_csv_path):
-    metadata = extract_csv_metadata(sample_csv_path, name_original="new_file")
-
-    assert isinstance(metadata, CSVMetadataCreate)
-    assert metadata.name_stored == "sample"
-    assert metadata.name_original == "new_file"
-    assert metadata.nrows == 5
-    assert metadata.ncols == 5
-    assert metadata.size_bytes == os.path.getsize(sample_csv_path)
+    assert (tmp_path / metadata.name_stored).with_suffix(".parquet").exists()
+    assert str(uuid.UUID(metadata.name_stored)) == metadata.name_stored

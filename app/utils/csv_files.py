@@ -3,14 +3,15 @@ import os
 import uuid
 from pathlib import Path
 
-import pyarrow.csv as csv
+import pyarrow.csv as pacsv
 import pyarrow.parquet as pq
 from fastapi import HTTPException, UploadFile
 from sqlmodel import Session
 
-from app.crud import create_metadata
+from app.crud import save_metadata
 from app.log_config import logger
 from app.schemas import CSVMetadataCreate
+from app.utils.detectors import get_idx_date, get_idx_id, get_idx_value
 
 
 async def save_uploaded_csv(
@@ -20,7 +21,7 @@ async def save_uploaded_csv(
     path = (dir / name).with_suffix(".parquet")
 
     content = await file.read()
-    table = csv.read_csv(io.BytesIO(content))
+    table = pacsv.read_csv(io.BytesIO(content))
 
     try:
         pq.write_table(table, path)
@@ -28,16 +29,29 @@ async def save_uploaded_csv(
         logger.error(f"Failed to write parquet file: {e}")
         raise
 
+    metadata = create_and_save_metadata(session, file, path, table)
+    return metadata
+
+
+def create_and_save_metadata(
+    session: Session, file: UploadFile, path: Path, table
+) -> CSVMetadataCreate:
+    idx_id = get_idx_id(table)
+    idx_date = get_idx_date(table)
+    idx_value = get_idx_value(table, idx_id)
+
     metadata = CSVMetadataCreate(
         name_stored=path.stem,
-        name_original=file.filename,
+        name_original=Path(file.filename).stem,
         size_bytes=os.path.getsize(path),
         nrows=table.shape[0],
         ncols=table.shape[1],
+        idx_id=idx_id,
+        idx_date=idx_date,
+        idx_value=idx_value,
     )
-
     try:
-        create_metadata(session=session, csv_metadata=metadata)
+        save_metadata(session, metadata)
     except Exception:
         logger.exception(
             "Metadata insert failed, cleaning up parquet file",
@@ -45,5 +59,4 @@ async def save_uploaded_csv(
         )
         path.unlink(missing_ok=True)
         raise HTTPException(status_code=500, detail="Failed to save metadata")
-
     return metadata

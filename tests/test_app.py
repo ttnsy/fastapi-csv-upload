@@ -10,15 +10,20 @@ def test_upload_csv_file(client, sample_csv_path, tmp_path):
 
     res = response.json()
     assert "metadata" in res
-
     metadata = res["metadata"]
     assert "name_stored" in metadata
     assert metadata["name_original"] == "sample"
-    assert metadata["nrows"] == 5
-    assert metadata["ncols"] == 5
 
-    saved_path = tmp_path / metadata["name_stored"]
-    assert saved_path.exists()
+    text = sample_csv_path.read_text().strip().splitlines()
+    header = text[0]
+    rows = text[1:]
+    nrows = len(rows)
+    ncols = len(header.split(","))
+
+    assert metadata["nrows"] == nrows
+    assert metadata["ncols"] == ncols
+
+    assert (tmp_path / metadata["name_stored"]).with_suffix(".parquet").exists()
 
 
 def test_upload_rejects_non_csv(client):

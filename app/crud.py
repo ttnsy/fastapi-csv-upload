@@ -4,8 +4,8 @@ from app.models import CSVMetadata
 from app.schemas import CSVMetadataCreate
 
 
-def create_metadata(session: Session, csv_metadata: CSVMetadataCreate):
-    db_obj = CSVMetadata.model_validate(csv_metadata)
+def save_metadata(session: Session, metadata: CSVMetadataCreate):
+    db_obj = CSVMetadata.model_validate(metadata)
 
     session.add(db_obj)
     session.commit()

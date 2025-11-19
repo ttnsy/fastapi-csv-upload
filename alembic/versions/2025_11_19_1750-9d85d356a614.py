@@ -1,18 +1,19 @@
-"""'Add idx_id, idx_date, idx_value columns'
+"""'Add nullable idx columns'
 
-Revision ID: 536effe187e8
+Revision ID: 9d85d356a614
 Revises: 73d2e0f178ae
-Create Date: 2025-11-14 02:24:55.337357
+Create Date: 2025-11-19 17:50:11.235971
 
 """
 from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = '536effe187e8'
+revision: str = '9d85d356a614'
 down_revision: Union[str, Sequence[str], None] = '73d2e0f178ae'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

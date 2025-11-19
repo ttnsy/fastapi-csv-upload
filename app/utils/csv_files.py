@@ -11,7 +11,12 @@ from sqlmodel import Session
 from app.crud import save_metadata
 from app.log_config import logger
 from app.schemas import CSVMetadataCreate
-from app.utils.detectors import get_idx_date, get_idx_id, get_idx_value
+from app.utils.detectors import (
+    get_idx_date,
+    get_idx_id,
+    get_idx_value,
+    has_header_pacsv,
+)
 
 
 async def save_uploaded_csv(
@@ -22,6 +27,10 @@ async def save_uploaded_csv(
 
     content = await file.read()
     table = pacsv.read_csv(io.BytesIO(content))
+
+    if not has_header_pacsv(table):
+        logger.warning(f"CSV missing header row: {file.filename}")
+        raise HTTPException(400, "Missing header row")
 
     try:
         pq.write_table(table, path)

@@ -11,12 +11,12 @@ VALUE_KEY = "value"
 DATE_KEYS = ["date", "day", "time", "timestamp", "datetime", "dttm"]
 
 
-def norm(name: str) -> List[str]:
+def _norm(name: str) -> List[str]:
     name = str(name).lower().strip()
     return re.split(r"[^a-z0-9]+", name)
 
 
-def find_by_name(
+def _find_by_name(
     table: Table,
     keys: List[str],
     *,
@@ -26,13 +26,13 @@ def find_by_name(
     for idx, name in enumerate(table.column_names):
         if exclude is not None and idx == exclude:
             continue
-        tokens = norm(name)
+        tokens = _norm(name)
         if any(k in tokens for k in keys):
             cols.append(idx)
     return cols
 
 
-def resolve(cols: List[int], table: Table, label: str) -> Optional[int]:
+def _resolve(cols: List[int], table: Table, label: str) -> Optional[int]:
     if len(cols) > 1:
         raise HTTPException(
             status_code=400,
@@ -43,9 +43,17 @@ def resolve(cols: List[int], table: Table, label: str) -> Optional[int]:
     return None
 
 
+def has_header_pacsv(table) -> bool:
+    for name in table.column_names:
+        s = str(name)
+        if any(c.isalpha() for c in s):
+            return True
+    return False
+
+
 def get_idx_id(table: Table) -> Optional[int]:
-    cols_n = find_by_name(table, [ID_KEY])
-    res = resolve(cols_n, table, "ID")
+    cols_n = _find_by_name(table, [ID_KEY])
+    res = _resolve(cols_n, table, "ID")
     if res is not None:
         return res
 
@@ -59,12 +67,12 @@ def get_idx_id(table: Table) -> Optional[int]:
             if not ser.empty and ser.is_unique:
                 cols_t.append(idx)
 
-    return resolve(cols_t, table, "ID")
+    return _resolve(cols_t, table, "ID")
 
 
 def get_idx_value(table: Table, id_idx: Optional[int]) -> Optional[int]:
-    cols_n = find_by_name(table, [VALUE_KEY], exclude=id_idx)
-    res = resolve(cols_n, table, "VALUE")
+    cols_n = _find_by_name(table, [VALUE_KEY], exclude=id_idx)
+    res = _resolve(cols_n, table, "VALUE")
     if res is not None:
         return res
 
@@ -80,12 +88,12 @@ def get_idx_value(table: Table, id_idx: Optional[int]) -> Optional[int]:
             if not ser.empty:
                 cols_t.append(idx)
 
-    return resolve(cols_t, table, "VALUE")
+    return _resolve(cols_t, table, "VALUE")
 
 
 def get_idx_date(table: Table) -> Optional[int]:
-    cols_n = find_by_name(table, DATE_KEYS)
-    res = resolve(cols_n, table, "DATE")
+    cols_n = _find_by_name(table, DATE_KEYS)
+    res = _resolve(cols_n, table, "DATE")
     if res is not None:
         return res
 
@@ -94,7 +102,7 @@ def get_idx_date(table: Table) -> Optional[int]:
         for idx, field in enumerate(table.schema)
         if pa.types.is_date(field.type) or pa.types.is_timestamp(field.type)
     ]
-    res = resolve(cols_t, table, "DATE")
+    res = _resolve(cols_t, table, "DATE")
     if res is not None:
         return res
 
@@ -109,4 +117,4 @@ def get_idx_date(table: Table) -> Optional[int]:
             if parsed.notna().any():
                 cols_p.append(idx)
 
-    return resolve(cols_p, table, "DATE")
+    return _resolve(cols_p, table, "DATE")

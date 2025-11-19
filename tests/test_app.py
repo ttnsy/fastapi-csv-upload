@@ -1,7 +1,10 @@
 import io
+from pathlib import Path
+
+from fastapi.testclient import TestClient
 
 
-def test_upload_csv_file(client, sample_csv_path, tmp_path):
+def test_upload_csv_file(client: TestClient, sample_csv_path: Path, tmp_path: Path):
     with sample_csv_path.open("rb") as f:
         response = client.post(
             "/csv-file/", files={"file": ("sample.csv", f, "text/csv")}
@@ -26,7 +29,7 @@ def test_upload_csv_file(client, sample_csv_path, tmp_path):
     assert (tmp_path / metadata["name_stored"]).with_suffix(".parquet").exists()
 
 
-def test_upload_rejects_non_csv(client):
+def test_upload_rejects_non_csv(client: TestClient):
     fake_file = io.BytesIO(b"some content")
     response = client.post(
         "/csv-file/", files={"file": ("not_a_csv.txt", fake_file, "text/plain")}
@@ -34,7 +37,7 @@ def test_upload_rejects_non_csv(client):
     assert response.status_code == 400
 
 
-def test_download_uploaded_csv_file(client, sample_csv_path):
+def test_download_uploaded_csv_file(client: TestClient, sample_csv_path: Path):
     with sample_csv_path.open("rb") as f:
         response = client.post(
             "/csv-file/", files={"file": ("sample.csv", f, "text/csv")}

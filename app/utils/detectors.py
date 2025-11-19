@@ -23,12 +23,23 @@ def _find_by_name(
     exclude: Optional[int] = None,
 ) -> List[int]:
     cols: List[int] = []
+    keys = [k.lower() for k in keys]
+
     for idx, name in enumerate(table.column_names):
         if exclude is not None and idx == exclude:
             continue
+
         tokens = _norm(name)
-        if any(k in tokens for k in keys):
-            cols.append(idx)
+
+        for tok in tokens:
+            for key in keys:
+                if tok == key or tok.startswith(key) or tok.endswith(key) or key in tok:
+                    cols.append(idx)
+                    break
+            else:
+                continue
+            break
+
     return cols
 
 
@@ -70,7 +81,7 @@ def get_idx_id(table: Table) -> Optional[int]:
     return _resolve(cols_t, table, "ID")
 
 
-def get_idx_value(table: Table, id_idx: Optional[int]) -> Optional[int]:
+def get_idx_value(table: Table, id_idx: Optional[int] = None) -> Optional[int]:
     cols_n = _find_by_name(table, [VALUE_KEY], exclude=id_idx)
     res = _resolve(cols_n, table, "VALUE")
     if res is not None:

@@ -26,7 +26,7 @@ async def upload_csv(
         logger.warning(f"Rejected file {file.filename} (not .csv)")
         raise HTTPException(status_code=400, detail="Only accept .csv")
 
-    metadata = await save_uploaded_csv(file, session, dir=upload_dir)
+    metadata = await save_uploaded_csv(session, file, dir=upload_dir)
 
     return {"message": "Success", "metadata": metadata}
 

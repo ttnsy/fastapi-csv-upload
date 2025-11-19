@@ -20,9 +20,12 @@ from app.utils.detectors import (
 
 
 async def save_uploaded_csv(
-    file: UploadFile, session: Session, dir: Path
+    session: Session,
+    file: UploadFile,
+    dir: Path,
+    stored_name: str | None = None,
 ) -> CSVMetadataCreate:
-    name = str(uuid.uuid4())
+    name = stored_name or str(uuid.uuid4())
     path = (dir / name).with_suffix(".parquet")
 
     content = await file.read()

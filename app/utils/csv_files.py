@@ -29,7 +29,6 @@ async def save_uploaded_csv(
     table = pacsv.read_csv(io.BytesIO(content))
 
     if not has_header_pacsv(table):
-        logger.warning(f"CSV missing header row: {file.filename}")
         raise HTTPException(400, "Missing header row")
 
     try:
@@ -48,6 +47,21 @@ def create_and_save_metadata(
     idx_id = get_idx_id(table)
     idx_date = get_idx_date(table)
     idx_value = get_idx_value(table, idx_id)
+
+    missing = []
+    if idx_id is None:
+        missing.append("ID")
+    if idx_date is None:
+        missing.append("DATE")
+    if idx_value is None:
+        missing.append("VALUE")
+
+    if missing:
+        path.unlink(missing_ok=True)
+        raise HTTPException(
+            status_code=400,
+            detail=f"Missing required column(s): {', '.join(missing)}",
+        )
 
     metadata = CSVMetadataCreate(
         name_stored=path.stem,

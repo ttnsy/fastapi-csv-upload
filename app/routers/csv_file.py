@@ -22,7 +22,7 @@ async def upload_csv(
     upload_dir: UploadDirDep,
     file: UploadFile = File(...),
 ):
-    if not file.filename.endswith(".csv"):
+    if not file.filename or not file.filename.endswith(".csv"):
         logger.warning(f"Rejected file {file.filename} (not .csv)")
         raise HTTPException(status_code=400, detail="Only accept .csv")
 

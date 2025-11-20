@@ -15,5 +15,5 @@ class CSVMetadata(SQLModel, table=True):
     uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     @classmethod
-    def schema(cls) -> dict[str, type]:
-        return {name: field.annotation for name, field in cls.model_fields.items()}
+    def field_names(cls) -> set[str]:
+        return set(cls.model_fields.keys())

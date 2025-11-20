@@ -118,7 +118,7 @@ async def test_save_uploaded_csv_success(
     )
     assert (tmp_path / f"{stored_name}.parquet").exists()
     assert isinstance(metadata, CSVMetadataCreate)
-    assert set(metadata.model_dump().keys()) == set(CSVMetadata.schema().keys())
+    assert set(metadata.model_dump().keys()) == CSVMetadata.field_names()
 
 
 @pytest.mark.asyncio

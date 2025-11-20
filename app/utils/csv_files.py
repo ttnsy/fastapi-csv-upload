@@ -68,7 +68,7 @@ def create_and_save_metadata(
 
     metadata = CSVMetadataCreate(
         name_stored=path.stem,
-        name_original=Path(file.filename).stem,
+        name_original=Path(file.filename or "unknown").stem,
         size_bytes=os.path.getsize(path),
         nrows=table.shape[0],
         ncols=table.shape[1],

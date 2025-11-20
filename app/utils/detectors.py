@@ -4,7 +4,6 @@ from typing import List, Optional
 import pandas as pd
 import pyarrow as pa
 from fastapi import HTTPException
-from sqlalchemy import Table
 
 ID_KEY = "id"
 VALUE_KEY = "value"
@@ -17,7 +16,7 @@ def _norm(name: str) -> List[str]:
 
 
 def _find_by_name(
-    table: Table,
+    table: pa.Table,
     keys: List[str],
     *,
     exclude: Optional[int] = None,
@@ -43,7 +42,7 @@ def _find_by_name(
     return cols
 
 
-def _resolve(cols: List[int], table: Table, label: str) -> Optional[int]:
+def _resolve(cols: List[int], table: pa.Table, label: str) -> Optional[int]:
     if len(cols) > 1:
         raise HTTPException(
             status_code=400,
@@ -62,7 +61,7 @@ def has_header_pacsv(table) -> bool:
     return False
 
 
-def get_idx_id(table: Table) -> Optional[int]:
+def get_idx_id(table: pa.Table) -> Optional[int]:
     cols_n = _find_by_name(table, [ID_KEY])
     res = _resolve(cols_n, table, "ID")
     if res is not None:
@@ -81,7 +80,7 @@ def get_idx_id(table: Table) -> Optional[int]:
     return _resolve(cols_t, table, "ID")
 
 
-def get_idx_value(table: Table, id_idx: Optional[int] = None) -> Optional[int]:
+def get_idx_value(table: pa.Table, id_idx: Optional[int] = None) -> Optional[int]:
     cols_n = _find_by_name(table, [VALUE_KEY], exclude=id_idx)
     res = _resolve(cols_n, table, "VALUE")
     if res is not None:
@@ -102,7 +101,7 @@ def get_idx_value(table: Table, id_idx: Optional[int] = None) -> Optional[int]:
     return _resolve(cols_t, table, "VALUE")
 
 
-def get_idx_date(table: Table) -> Optional[int]:
+def get_idx_date(table: pa.Table) -> Optional[int]:
     cols_n = _find_by_name(table, DATE_KEYS)
     res = _resolve(cols_n, table, "DATE")
     if res is not None:

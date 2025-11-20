@@ -29,3 +29,7 @@ addopts = ["-vvs"]
 env = [
     "DB_PATH=test.db",
 ]
+
+[[tool.mypy.overrides]]
+module = ["pyarrow", "pyarrow.csv", "pyarrow.parquet"]
+ignore_missing_imports = true

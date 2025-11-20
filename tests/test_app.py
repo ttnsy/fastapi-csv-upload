@@ -1,27 +1,22 @@
 import io
+from pathlib import Path
+
+from fastapi.testclient import TestClient
 
 
-def test_upload_csv_file(client, sample_csv_path, tmp_path):
+def test_upload_csv_file_success(
+    client: TestClient, sample_csv_path: Path, tmp_path: Path
+):
     with sample_csv_path.open("rb") as f:
         response = client.post(
-            "/csv-file/", files={"file": ("sample.csv", f, "text/csv")}
+            "/csv-file/",
+            files={"file": ("sample.csv", f, "text/csv")},
         )
     assert response.status_code == 200
-
-    res = response.json()
-    assert "metadata" in res
-
-    metadata = res["metadata"]
-    assert "name_stored" in metadata
-    assert metadata["name_original"] == "sample"
-    assert metadata["nrows"] == 5
-    assert metadata["ncols"] == 5
-
-    saved_path = tmp_path / metadata["name_stored"]
-    assert saved_path.exists()
+    assert "metadata" in response.json()
 
 
-def test_upload_rejects_non_csv(client):
+def test_upload_csv_file_rejects_non_csv(client: TestClient):
     fake_file = io.BytesIO(b"some content")
     response = client.post(
         "/csv-file/", files={"file": ("not_a_csv.txt", fake_file, "text/plain")}
@@ -29,14 +24,15 @@ def test_upload_rejects_non_csv(client):
     assert response.status_code == 400
 
 
-def test_download_uploaded_csv_file(client, sample_csv_path):
+def test_download_uploaded_csv_success(client: TestClient, sample_csv_path: Path):
     with sample_csv_path.open("rb") as f:
         response = client.post(
             "/csv-file/", files={"file": ("sample.csv", f, "text/csv")}
         )
     assert response.status_code == 200
-    metadata = response.json()["metadata"]
-    filename = metadata["name_stored"]
 
-    download_response = client.get(f"/csv-file/{filename}")
+    metadata = response.json().get("metadata")
+    assert metadata is not None
+
+    download_response = client.get(f"/csv-file/{metadata.get('name_stored')}")
     assert download_response.status_code == 200

@@ -1,0 +1,28 @@
+default_stages: [pre-push]
+
+repos:
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff (lint)
+        entry: uv run ruff check .
+        language: system
+        pass_filenames: false
+
+      - id: alembic-upgrade
+        name: alembic upgrade head
+        entry: sh -c 'DB_PATH="${DB_PATH:-test.db}" uv run alembic upgrade head'
+        language: system
+        pass_filenames: false
+
+      - id: pytest
+        name: pytest
+        entry: sh -c 'DB_PATH="${DB_PATH:-test.db}" uv run pytest'
+        language: system
+        pass_filenames: false
+
+      - id: mypy
+        name: mypy
+        entry: uv run mypy app/
+        language: system
+        pass_filenames: false

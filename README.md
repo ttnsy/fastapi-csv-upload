@@ -26,6 +26,25 @@ task setup
 task dev
 ```
 
+### Pre-commit (Pre-push) Setup
+
+This repository uses `pre-commit` to run CI-like checks locally before pushing code. The checks mirror the GitHub Actions workflow and help catch issues early.
+
+To install pre-commit hooks (one-time setup):
+```bash
+# Make sure project dependencies installed:
+uv sync --locked --all-extras --dev
+
+# Install pre-commit:
+uv run pre-commit install --hook-type pre-push
+```
+
+To manually run the pre-push (without pushing):
+
+```bash
+uv run pre-commit run --hook-stage pre-push --all-files
+```
+
 ### 🧪 Run Tests
 
 Tests are written with `pytest` and can be run with:

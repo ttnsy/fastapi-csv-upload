@@ -10,6 +10,7 @@ dependencies = [
     "mypy>=1.15.0",
     "pandas>=2.2.3",
     "pandas-stubs>=2.2.3.250308",
+    "pyarrow>=22.0.0",
     "pydantic-settings>=2.8.1",
     "pytest-asyncio>=0.26.0",
     "pytest-env>=1.1.5",
@@ -30,3 +31,7 @@ addopts = ["-vvs"]
 env = [
     "DB_PATH=test.db",
 ]
+
+[[tool.mypy.overrides]]
+module = ["pyarrow", "pyarrow.csv", "pyarrow.parquet"]
+ignore_missing_imports = true

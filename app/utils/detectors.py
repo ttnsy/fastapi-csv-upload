@@ -10,7 +10,7 @@ VALUE_KEY = "value"
 DATE_KEYS = ["date", "day", "time", "timestamp", "datetime", "dttm"]
 
 
-def _norm(name: str) -> List[str]:
+def _norm(name: str | int) -> List[str]:
     name = str(name).lower().strip()
     return re.split(r"[^a-z0-9]+", name)
 

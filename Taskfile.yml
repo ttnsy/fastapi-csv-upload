@@ -19,7 +19,6 @@ tasks:
 
   upgrade:
     desc: Apply all migrations
-      - uv run alembic upgrade head
     cmds:
       - uv run alembic upgrade head
 

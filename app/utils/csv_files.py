@@ -1,34 +1,88 @@
+import io
 import os
 import uuid
 from pathlib import Path
 
-import pandas as pd
-from fastapi import UploadFile
+import pyarrow.csv as pacsv
+import pyarrow.parquet as pq
+from fastapi import HTTPException, UploadFile
+from sqlmodel import Session
 
+from app.crud import save_metadata
+from app.log_config import logger
 from app.schemas import CSVMetadataCreate
+from app.utils.detectors import (
+    get_idx_date,
+    get_idx_id,
+    get_idx_value,
+    has_header_pacsv,
+)
 
 
-async def save_uploaded_csv(file: UploadFile, dir: Path) -> Path:
-    name = str(uuid.uuid4())
-    path = dir / name
+async def save_uploaded_csv(
+    session: Session,
+    file: UploadFile,
+    dir: Path,
+    stored_name: str | None = None,
+) -> CSVMetadataCreate:
+    name = stored_name or str(uuid.uuid4())
+    path = (dir / name).with_suffix(".parquet")
 
     content = await file.read()
-    with open(path, "wb") as f:
-        f.write(content)
+    table = pacsv.read_csv(io.BytesIO(content))
 
-    return path
+    if not has_header_pacsv(table):
+        raise HTTPException(400, "Missing header row")
 
-
-def extract_csv_metadata(file_path: Path, name_original: str):
     try:
-        df = pd.read_csv(file_path)
+        pq.write_table(table, path)
     except Exception as e:
-        raise ValueError(f"Failed to read CSV: {e}")
+        logger.error(f"Failed to write parquet file: {e}")
+        raise
 
-    return CSVMetadataCreate(
-        name_stored=file_path.stem,
-        name_original=name_original,
-        size_bytes=os.path.getsize(file_path),
-        nrows=df.shape[0],
-        ncols=df.shape[1],
+    metadata = create_and_save_metadata(session, file, path, table)
+    return metadata
+
+
+def create_and_save_metadata(
+    session: Session, file: UploadFile, path: Path, table
+) -> CSVMetadataCreate:
+    idx_id = get_idx_id(table)
+    idx_date = get_idx_date(table)
+    idx_value = get_idx_value(table, idx_id)
+
+    missing = []
+    if idx_id is None:
+        missing.append("ID")
+    if idx_date is None:
+        missing.append("DATE")
+    if idx_value is None:
+        missing.append("VALUE")
+
+    if missing:
+        path.unlink(missing_ok=True)
+        raise HTTPException(
+            status_code=400,
+            detail=f"Missing required column(s): {', '.join(missing)}",
+        )
+
+    metadata = CSVMetadataCreate(
+        name_stored=path.stem,
+        name_original=Path(file.filename or "unknown").stem,
+        size_bytes=os.path.getsize(path),
+        nrows=table.shape[0],
+        ncols=table.shape[1],
+        idx_id=idx_id,
+        idx_date=idx_date,
+        idx_value=idx_value,
     )
+    try:
+        save_metadata(session, metadata)
+    except Exception:
+        logger.exception(
+            "Metadata insert failed, cleaning up parquet file",
+            extra={"stored_path": str(path)},
+        )
+        path.unlink(missing_ok=True)
+        raise HTTPException(status_code=500, detail="Failed to save metadata")
+    return metadata

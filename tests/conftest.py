@@ -2,12 +2,10 @@ import logging
 import os
 from pathlib import Path
 
-import alembic.config
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session
+from sqlmodel import Session, SQLModel, create_engine
 
-from app.database import engine
 from app.dependencies import get_session, get_upload_dir
 from app.main import app
 
@@ -24,22 +22,24 @@ def disable_logging():
 # -------------------------------------------------------------
 
 
-@pytest.fixture(scope="session", autouse=True)
-def setup_test_db():
-    alembic.config.main(argv=["--raiseerr", "upgrade", "head"])
-    yield
-    Path(os.getenv("DB_PATH")).unlink(missing_ok=True)
+@pytest.fixture(scope="session")
+def test_engine(tmp_path_factory):
+    db_path = tmp_path_factory.mktemp("db") / "test.db"
+    os.environ["DB_PATH"] = str(db_path)
+    engine = create_engine(
+        f"sqlite:///{db_path}",
+        connect_args={"check_same_thread": False},
+        echo=False,
+    )
+    SQLModel.metadata.create_all(engine)
+    yield engine
+    db_path.unlink(missing_ok=True)
 
 
 @pytest.fixture
-def session():
-    with Session(engine) as session:
-        yield session
-
-
-# -------------------------------------------------------------
-# FASTAPI CLIENT SETUP WITH DEPENDENCY OVERRIDES
-# -------------------------------------------------------------
+def session(test_engine):
+    with Session(test_engine) as s:
+        yield s
 
 
 @pytest.fixture

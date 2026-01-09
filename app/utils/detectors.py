@@ -24,11 +24,11 @@ def _find_by_name(
     cols: List[int] = []
     keys = [k.lower() for k in keys]
 
-    for idx, name in enumerate(table.column_names):
+    for idx, col_name in enumerate(table.column_names):
         if exclude is not None and idx == exclude:
             continue
 
-        tokens = _norm(name)
+        tokens = _norm(col_name)
 
         for tok in tokens:
             for key in keys:

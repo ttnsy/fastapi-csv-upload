@@ -42,7 +42,6 @@ async def download_csv(filename: str, upload_dir: UploadDirDep):
         raise HTTPException(status_code=404, detail="File not found")
 
     table = pq.read_table(parquet_path)
-    parquet_path = (upload_dir / filename).with_suffix(".parquet")
 
     if not parquet_path.exists():
         logger.warning(

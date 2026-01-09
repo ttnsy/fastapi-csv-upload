@@ -3,7 +3,8 @@ from typing import List, Optional
 
 import pandas as pd
 import pyarrow as pa
-from fastapi import HTTPException
+
+from app.log_config import logger
 
 ID_KEY = "id"
 VALUE_KEY = "value"
@@ -32,7 +33,7 @@ def _find_by_name(
 
         for tok in tokens:
             for key in keys:
-                if tok == key or tok.startswith(key) or tok.endswith(key) or key in tok:
+                if key in tok:
                     cols.append(idx)
                     break
             else:
@@ -43,14 +44,14 @@ def _find_by_name(
 
 
 def _resolve(cols: List[int], table: pa.Table, label: str) -> Optional[int]:
+    if len(cols) == 0:
+        return None
     if len(cols) > 1:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Multiple {label}-like columns: {[table.column_names[i] for i in cols]}",
+        column_names = [table.column_names[i] for i in cols]
+        logger.warning(
+            f"Multiple {label}-like columns found: {column_names}. Using the first one: {column_names[0]}"
         )
-    if len(cols) == 1:
-        return cols[0]
-    return None
+    return cols[0]
 
 
 def has_header_pacsv(table) -> bool:

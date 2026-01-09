@@ -3,7 +3,7 @@ import io
 import pyarrow.csv as pacsv
 import pyarrow.parquet as pq
 from fastapi import APIRouter, File, HTTPException, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response
 
 from app.dependencies import SessionDep, UploadDirDep
 from app.log_config import logger
@@ -43,20 +43,14 @@ async def download_csv(filename: str, upload_dir: UploadDirDep):
 
     table = pq.read_table(parquet_path)
 
-    if not parquet_path.exists():
-        logger.warning(
-            f"Download failed: {parquet_path.name} not found in {upload_dir}"
-        )
-        raise HTTPException(status_code=404, detail="File not found")
-
     sink = io.BytesIO()
     pacsv.write_csv(table, sink)
-    csv_bytes = sink.getvalue()
+    csv_content = sink.getvalue()
 
     logger.info(f"Serving CSV for {filename} from {upload_dir}")
 
-    return StreamingResponse(
-        io.BytesIO(csv_bytes),
+    return Response(
+        content=csv_content,
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{filename}.csv"'},
     )

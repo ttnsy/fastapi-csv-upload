@@ -1,0 +1,10 @@
+__pycache__/
+alembic/__pycache__/
+*_cache
+.git/
+.gitignore/
+.env
+.venv
+*.db
+**/*.ipynb
+assignments.md

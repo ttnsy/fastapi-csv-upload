@@ -6,24 +6,41 @@ A FastAPI-based service that lets users upload, store, and download CSV files.
 This project is built with:
 
 - [FastAPI](https://fastapi.tiangolo.com/) – for the web API
+- [Docker Compose](https://docs.docker.com/compose/) – for running the development environment  
 - [uv](https://github.com/astral-sh/uv) – for Python dependency and environment management
 - [Alembic](https://alembic.sqlalchemy.org/) – for database migrations
 - [Taskfile](https://taskfile.dev/) – to simplify common commands (like setup, running, and testing)
 
-> ‼️ **You don’t need to worry about installing or configuring those manually** as Taskfile takes care of everything for you
+> ‼️ **You don’t need to worry about installing or configuring those manually** as Docker and Taskfile take care of everything for you
 >  👉 Follow the steps in [🚀 Getting Started](#getting-started)
 
 ## 🚀 Getting Started
 
-- ✅ 1. Install Task (if you haven’t already). Installation guide → [https://taskfile.dev/installation](https://taskfile.dev/installation)
-- ✅ 2. Run setup to install all dependencies and prepares database:
-```bash
-task setup
-```
-- ✅ Once the project is initialized, you can run the app with:
+### 1. Install prerequisites
+
+Make sure you have the following installed:
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Task](https://taskfile.dev/installation)
+
+---
+
+### 2. Start the development environment
+
+Run:
 
 ```bash
 task dev
+```
+This will:
+- Build the Docker image
+- Start the backend container
+- Automatically run database migrations
+- Start the FastAPI server
+
+Once running, the API will be available at:
+```
+http://localhost:8000
 ```
 
 ### Pre-commit (Pre-push) Setup

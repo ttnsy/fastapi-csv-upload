@@ -1,0 +1,43 @@
+services:
+  database:
+    image: alpine:3.20
+    command: sh -c "echo database started"
+    volumes:
+      - sqlite_data:/db
+
+  backend:
+    build: .
+    environment:
+      DB_PATH: /db/database.db
+    ports:
+      - "8000:8000"
+    depends_on:
+      - database
+    volumes:
+      - sqlite_data:/db
+    command: >
+      sh -c "uv run alembic upgrade head &&
+             uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+    develop:
+      watch:
+        - path: ./app
+          action: sync
+          target: /app/app
+
+        - path: ./alembic
+          action: sync
+          target: /app/alembic
+
+        - path: ./alembic.ini
+          action: sync
+          target: /app/alembic.ini
+
+        - path: pyproject.toml
+          action: rebuild
+
+        - path: uv.lock
+          action: rebuild
+
+volumes:
+  sqlite_data:

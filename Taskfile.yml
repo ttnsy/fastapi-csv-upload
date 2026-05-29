@@ -27,7 +27,7 @@ tasks:
   dev:
     desc: Run FastAPI dev server
     cmds:
-      - "docker compose up --build"
+      - "docker compose up --build --watch"
 
   test:
     desc: Run tests with separate DB

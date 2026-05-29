@@ -4,7 +4,8 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-from app.utils.analysis import AggFunc, AggPeriod, aggregate_dataframe
+from app.schemas import AggFunc, AggPeriod
+from app.services.analysis import aggregate_dataframe
 
 
 @pytest.fixture

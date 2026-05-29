@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Query
 from app.crud import get_metadata_by_name
 from app.dependencies import ParquetPathDep, SessionDep
 from app.schemas import AnalysisParams
-from app.utils.analysis import aggregate_dataframe
+from app.services.analysis import aggregate_dataframe
 
 router = APIRouter(
     prefix="/analysis",

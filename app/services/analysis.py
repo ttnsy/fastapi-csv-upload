@@ -1,18 +1,6 @@
-from enum import Enum
-
 import pandas as pd
 
-
-class AggPeriod(str, Enum):
-    daily = "daily"
-    weekly = "weekly"
-    monthly = "monthly"
-
-
-class AggFunc(str, Enum):
-    sum = "sum"
-    avg = "avg"
-    median = "median"
+from app.schemas import AggFunc, AggPeriod
 
 
 def aggregate_dataframe(df: pd.DataFrame, metadata, params) -> pd.DataFrame:

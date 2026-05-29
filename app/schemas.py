@@ -1,8 +1,19 @@
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel
 
-from app.utils.analysis import AggFunc, AggPeriod
+
+class AggPeriod(str, Enum):
+    daily = "daily"
+    weekly = "weekly"
+    monthly = "monthly"
+
+
+class AggFunc(str, Enum):
+    sum = "sum"
+    avg = "avg"
+    median = "median"
 
 
 class CSVMetadataCreate(BaseModel):

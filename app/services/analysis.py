@@ -1,9 +1,12 @@
 import pandas as pd
 
-from app.schemas import AggFunc, AggPeriod
+from app.models import Metadata
+from app.schemas import AggFunc, AggPeriod, AnalysisParams
 
 
-def aggregate_dataframe(df: pd.DataFrame, metadata, params) -> pd.DataFrame:
+def aggregate_dataframe(
+    df: pd.DataFrame, metadata: Metadata, params: AnalysisParams
+) -> pd.DataFrame:
     date_col = df.columns[metadata.idx_date]
     value_col = df.columns[metadata.idx_value]
     id_col = df.columns[metadata.idx_id] if params.group_by_id else None

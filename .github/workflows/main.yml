@@ -29,7 +29,7 @@ jobs:
 
      - name: Run pytest (unit tests)
        env:
-        DB_PATH: test.db
+        DATABASE_URL: sqlite:///test.db
        run: uv run alembic upgrade head && uv run pytest
 
      - name: Run mypy (type checking)

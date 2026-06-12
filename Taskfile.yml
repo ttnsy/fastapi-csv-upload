@@ -1,8 +1,5 @@
 version: "3"
 
-env:
-  DB_PATH: "database.db"
-
 tasks:
   setup:
     desc: Initial project setup
@@ -32,4 +29,8 @@ tasks:
   test:
     desc: Run tests with separate DB
     cmds:
-      - "docker compose exec backend sh -c 'DB_PATH=test.db uv run pytest -vvs'"
+      - >
+        docker compose run --rm
+        -v ./tests:/app/tests
+        -e DATABASE_URL=sqlite:///test.db
+        backend sh -c 'uv run pytest -vvs'

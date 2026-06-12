@@ -7,9 +7,17 @@ from app.schemas import AggFunc, AggPeriod, AnalysisParams
 def aggregate_dataframe(
     df: pd.DataFrame, metadata: CSVMetadata, params: AnalysisParams
 ) -> pd.DataFrame:
+    if metadata.idx_date is None or metadata.idx_value is None:
+        raise ValueError("metadata.idx_date and metadata.idx_value must be set")
+
     date_col = df.columns[metadata.idx_date]
     value_col = df.columns[metadata.idx_value]
-    id_col = df.columns[metadata.idx_id] if params.group_by_id else None
+
+    id_col = None
+    if params.group_by_id:
+        if metadata.idx_id is None:
+            raise ValueError("metadata.idx_id must be set when group_by_id is True")
+        id_col = df.columns[metadata.idx_id]
 
     df[date_col] = pd.to_datetime(df[date_col])
 

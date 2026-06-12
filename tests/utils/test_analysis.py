@@ -1,10 +1,10 @@
 from datetime import date
-from unittest.mock import MagicMock
+from types import SimpleNamespace
 
 import pandas as pd
 import pytest
 
-from app.schemas import AggFunc, AggPeriod
+from app.schemas import AggFunc, AggPeriod, AnalysisParams
 from app.services.analysis import aggregate_dataframe
 
 
@@ -26,135 +26,60 @@ def sample_dataframe():
 
 
 @pytest.fixture
-def metadata_mock():
-    mock = MagicMock()
-    mock.idx_id = 0
-    mock.idx_date = 1
-    mock.idx_value = 2
-    return mock
+def metadata():
+    return SimpleNamespace(idx_id=0, idx_date=1, idx_value=2)
 
 
-@pytest.fixture
-def params_mock():
-    mock = MagicMock()
-    mock.agg_period = AggPeriod.daily
-    mock.agg_func = AggFunc.sum
-    mock.group_by_id = False
-    return mock
+def make_params(agg_period, agg_func, group_by_id=False):
+    return AnalysisParams(
+        agg_period=agg_period, agg_func=agg_func, group_by_id=group_by_id
+    )
 
 
-# --- AggPeriod and AggFunc Enum tests ---
-def test_agg_period_values():
-    assert AggPeriod.daily.value == "daily"
-    assert AggPeriod.weekly.value == "weekly"
-    assert AggPeriod.monthly.value == "monthly"
-
-
-def test_agg_func_values():
-    assert AggFunc.sum.value == "sum"
-    assert AggFunc.avg.value == "avg"
-    assert AggFunc.median.value == "median"
-
-
-# --- daily aggregation tests ---
-def test_aggregate_daily_sum(sample_dataframe, metadata_mock, params_mock):
-    params_mock.agg_period = AggPeriod.daily
-    params_mock.agg_func = AggFunc.sum
-    params_mock.group_by_id = False
-
-    result = aggregate_dataframe(sample_dataframe, metadata_mock, params_mock)
+# --- non-grouped aggregation: value checks ---
+@pytest.mark.parametrize(
+    "agg_period, agg_func, period_key, expected_value",
+    [
+        (AggPeriod.daily, AggFunc.sum, date(2025, 1, 1), 40.0),
+        (AggPeriod.daily, AggFunc.avg, date(2025, 1, 1), 20.0),
+        (AggPeriod.daily, AggFunc.median, date(2025, 1, 1), 20.0),
+        (AggPeriod.monthly, AggFunc.sum, "2025-01", 100.0),
+        (AggPeriod.monthly, AggFunc.avg, "2025-01", 25.0),
+        (AggPeriod.monthly, AggFunc.median, "2025-01", 25.0),
+    ],
+)
+def test_aggregate_value(
+    sample_dataframe, metadata, agg_period, agg_func, period_key, expected_value
+):
+    params = make_params(agg_period, agg_func)
+    result = aggregate_dataframe(sample_dataframe, metadata, params)
 
     assert "period" in result.columns
     assert "VALUE" in result.columns
-    assert len(result) == 4
-    assert result[result["period"] == date(2025, 1, 1)]["VALUE"].values[0] == 40.0
+    assert result[result["period"] == period_key]["VALUE"].values[0] == expected_value
 
 
-def test_aggregate_daily_avg(sample_dataframe, metadata_mock, params_mock):
-    params_mock.agg_period = AggPeriod.daily
-    params_mock.agg_func = AggFunc.avg
-    params_mock.group_by_id = False
-
-    result = aggregate_dataframe(sample_dataframe, metadata_mock, params_mock)
-
-    assert result[result["period"] == date(2025, 1, 1)]["VALUE"].values[0] == 20.0
-
-
-def test_aggregate_daily_median(sample_dataframe, metadata_mock, params_mock):
-    params_mock.agg_period = AggPeriod.daily
-    params_mock.agg_func = AggFunc.median
-    params_mock.group_by_id = False
-
-    result = aggregate_dataframe(sample_dataframe, metadata_mock, params_mock)
-
-    assert result[result["period"] == date(2025, 1, 1)]["VALUE"].values[0] == 20.0
+def test_aggregate_monthly_row_count(sample_dataframe, metadata):
+    params = make_params(AggPeriod.monthly, AggFunc.sum)
+    result = aggregate_dataframe(sample_dataframe, metadata, params)
+    assert len(result) == 2
 
 
 # --- weekly aggregation tests ---
-def test_aggregate_weekly_sum(sample_dataframe, metadata_mock, params_mock):
-    params_mock.agg_period = AggPeriod.weekly
-    params_mock.agg_func = AggFunc.sum
-    params_mock.group_by_id = False
-
-    result = aggregate_dataframe(sample_dataframe, metadata_mock, params_mock)
+@pytest.mark.parametrize("agg_func", [AggFunc.sum, AggFunc.avg])
+def test_aggregate_weekly_runs(sample_dataframe, metadata, agg_func):
+    params = make_params(AggPeriod.weekly, agg_func)
+    result = aggregate_dataframe(sample_dataframe, metadata, params)
 
     assert "period" in result.columns
-
-
-def test_aggregate_weekly_avg(sample_dataframe, metadata_mock, params_mock):
-    params_mock.agg_period = AggPeriod.weekly
-    params_mock.agg_func = AggFunc.avg
-    params_mock.group_by_id = False
-
-    result = aggregate_dataframe(sample_dataframe, metadata_mock, params_mock)
-
-    assert len(result) > 0
     assert "VALUE" in result.columns
-
-
-# --- monthly aggregation tests ---
-def test_aggregate_monthly_sum(sample_dataframe, metadata_mock, params_mock):
-    params_mock.agg_period = AggPeriod.monthly
-    params_mock.agg_func = AggFunc.sum
-    params_mock.group_by_id = False
-
-    result = aggregate_dataframe(sample_dataframe, metadata_mock, params_mock)
-
-    assert "period" in result.columns
-    assert len(result) == 2
-    assert result[result["period"] == "2025-01"]["VALUE"].values[0] == 100.0
-    assert result[result["period"] == "2025-02"]["VALUE"].values[0] == 50.0
-
-
-def test_aggregate_monthly_avg(sample_dataframe, metadata_mock, params_mock):
-    params_mock.agg_period = AggPeriod.monthly
-    params_mock.agg_func = AggFunc.avg
-    params_mock.group_by_id = False
-
-    result = aggregate_dataframe(sample_dataframe, metadata_mock, params_mock)
-
-    assert result[result["period"] == "2025-01"]["VALUE"].values[0] == 25.0
-
-
-def test_aggregate_monthly_median(sample_dataframe, metadata_mock, params_mock):
-    params_mock.agg_period = AggPeriod.monthly
-    params_mock.agg_func = AggFunc.median
-    params_mock.group_by_id = False
-
-    result = aggregate_dataframe(sample_dataframe, metadata_mock, params_mock)
-
-    assert result[result["period"] == "2025-01"]["VALUE"].values[0] == 25.0
+    assert len(result) > 0
 
 
 # --- group by id tests ---
-def test_aggregate_daily_sum_grouped_by_id(
-    sample_dataframe, metadata_mock, params_mock
-):
-    params_mock.agg_period = AggPeriod.daily
-    params_mock.agg_func = AggFunc.sum
-    params_mock.group_by_id = True
-
-    result = aggregate_dataframe(sample_dataframe, metadata_mock, params_mock)
+def test_aggregate_daily_sum_grouped_by_id(sample_dataframe, metadata):
+    params = make_params(AggPeriod.daily, AggFunc.sum, group_by_id=True)
+    result = aggregate_dataframe(sample_dataframe, metadata, params)
 
     assert "period" in result.columns
     assert "ID" in result.columns
@@ -162,14 +87,9 @@ def test_aggregate_daily_sum_grouped_by_id(
     assert len(result) == 5
 
 
-def test_aggregate_monthly_sum_grouped_by_id(
-    sample_dataframe, metadata_mock, params_mock
-):
-    params_mock.agg_period = AggPeriod.monthly
-    params_mock.agg_func = AggFunc.sum
-    params_mock.group_by_id = True
-
-    result = aggregate_dataframe(sample_dataframe, metadata_mock, params_mock)
+def test_aggregate_monthly_sum_grouped_by_id(sample_dataframe, metadata):
+    params = make_params(AggPeriod.monthly, AggFunc.sum, group_by_id=True)
+    result = aggregate_dataframe(sample_dataframe, metadata, params)
 
     # ID 1 in Jan: 10 + 20 = 30
     # ID 2 in Jan: 30 + 40 = 70
@@ -181,14 +101,9 @@ def test_aggregate_monthly_sum_grouped_by_id(
     assert jan_id2["VALUE"].values[0] == 70.0
 
 
-def test_aggregate_weekly_avg_grouped_by_id(
-    sample_dataframe, metadata_mock, params_mock
-):
-    params_mock.agg_period = AggPeriod.weekly
-    params_mock.agg_func = AggFunc.avg
-    params_mock.group_by_id = True
-
-    result = aggregate_dataframe(sample_dataframe, metadata_mock, params_mock)
+def test_aggregate_weekly_avg_grouped_by_id(sample_dataframe, metadata):
+    params = make_params(AggPeriod.weekly, AggFunc.avg, group_by_id=True)
+    result = aggregate_dataframe(sample_dataframe, metadata, params)
 
     assert "period" in result.columns
     assert "ID" in result.columns

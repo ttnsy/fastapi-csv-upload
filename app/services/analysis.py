@@ -1,11 +1,11 @@
 import pandas as pd
 
-from app.models import Metadata
+from app.models import CSVMetadata
 from app.schemas import AggFunc, AggPeriod, AnalysisParams
 
 
 def aggregate_dataframe(
-    df: pd.DataFrame, metadata: Metadata, params: AnalysisParams
+    df: pd.DataFrame, metadata: CSVMetadata, params: AnalysisParams
 ) -> pd.DataFrame:
     date_col = df.columns[metadata.idx_date]
     value_col = df.columns[metadata.idx_value]

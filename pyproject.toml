@@ -31,7 +31,7 @@ dev = [
 [tool.pytest.ini_options]
 addopts = ["-vvs"]
 env = [
-    "DB_PATH=test.db",
+    "DATABASE_URL=sqlite:///test.db",
 ]
 
 [[tool.mypy.overrides]]

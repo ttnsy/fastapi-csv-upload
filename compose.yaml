@@ -1,20 +1,37 @@
 services:
-  database:
-    image: alpine:3.20
-    command: sh -c "echo database started"
+  db:
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
     volumes:
-      - sqlite_data:/db
+      - pgdata:/var/lib/postgresql/data 
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080 
 
   backend:
     build: .
     environment:
-      DB_PATH: /db/database.db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "8000:8000"
     depends_on:
-      - database
+      db:
+        condition: service_healthy
     volumes:
-      - sqlite_data:/db
+      - ./data:/app/data
     command: >
       sh -c "uv run alembic upgrade head &&
              uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
@@ -40,4 +57,4 @@ services:
           action: rebuild
 
 volumes:
-  sqlite_data:
+  pgdata:

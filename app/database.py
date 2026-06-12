@@ -1,8 +1,15 @@
+from sqlalchemy import URL
 from sqlmodel import create_engine
 
 from app.config import settings
 
-connect_args = {"check_same_thread": False}
-engine = create_engine(
-    f"sqlite:///{settings.db_path}", echo=True, connect_args=connect_args
+url = URL.create(
+    drivername = "postgresql+psycopg",
+    username = settings.postgres_user,
+    password = settings.postgres_password,
+    host = settings.postgres_host,
+    port = settings.postgres_port,
+    database = settings.postgres_db
 )
+
+engine = create_engine(url, echo=True)

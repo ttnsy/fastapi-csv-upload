@@ -31,7 +31,12 @@ dev = [
 [tool.pytest.ini_options]
 addopts = ["-vvs"]
 env = [
-    "DATABASE_URL=sqlite:///test.db",
+    "POSTGRES_ENGINE=sqlite",
+    "POSTGRES_HOST=localhost",
+    "POSTGRES_PORT=5432",
+    "POSTGRES_USER=test",
+    "POSTGRES_PASSWORD=test",
+    "POSTGRES_DB=test",
 ]
 
 [[tool.mypy.overrides]]
@@ -39,7 +44,7 @@ module = ["pyarrow", "pyarrow.csv", "pyarrow.parquet"]
 ignore_missing_imports = true
 
 [tool.ruff]
-exclude = [".venv", "uv.lock"]
+exclude = [".venv", "uv.lock", "alembic"]
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]

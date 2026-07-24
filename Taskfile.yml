@@ -27,10 +27,6 @@ tasks:
       - "docker compose up --build"
 
   test:
-    desc: Run tests with separate DB
+    desc: Run tests locally with uv (SQLite in-memory)
     cmds:
-      - >
-        docker compose run --rm
-        -v ./tests:/app/tests
-        -e DATABASE_URL=sqlite:///test.db
-        backend sh -c 'uv run pytest -vvs'
+      - "uv run pytest"

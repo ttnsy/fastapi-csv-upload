@@ -6,6 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel
 
+from app.config import settings
 from app.database import engine
 from app.dependencies import get_session, get_upload_dir
 from app.main import app
@@ -13,8 +14,9 @@ from app.main import app
 
 @pytest.fixture(scope="session", autouse=True)
 def test_setup():
-    db_url = os.environ.get("DATABASE_URL", "")
-    assert db_url.startswith("sqlite"), f"Tests must use SQLite, got: {db_url}"
+    assert settings.engine == "sqlite", (
+        f"Tests must use SQLite, got engine: {settings.engine}"
+    )
     logging.disable(logging.CRITICAL)
     yield
     logging.disable(logging.NOTSET)

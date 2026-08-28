@@ -9,23 +9,23 @@ UPLOAD_DIR = Path("data")
 
 class DatabaseSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env", env_prefix="POSTGRES_", extra="ignore"
+        env_file=".env", extra="ignore"
     )
 
-    engine: Literal["sqlite", "postgres"] = Field(default="sqlite")
-    host: str
-    port: int
-    user: str
-    password: str
-    db: str
+    database_engine: Literal["sqlite", "postgres"] = Field(default="sqlite")
+    database_host: str
+    database_port: int
+    database_user: str
+    database_password: str
+    database_db: str
 
     @property
     def database_url(self) -> str:
-        if self.engine == "sqlite":
+        if self.database_engine == "sqlite":
             return "sqlite:///:memory:"
         return (
-            f"postgresql+psycopg://{self.user}:{self.password}"
-            f"@{self.host}:{self.port}/{self.db}"
+            f"postgresql+psycopg://{self.database_user}:{self.database_password}"
+            f"@{self.database_host}:{self.database_port}/{self.database_db}"
         )
 
 

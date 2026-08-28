@@ -31,12 +31,12 @@ dev = [
 [tool.pytest.ini_options]
 addopts = ["-vvs"]
 env = [
-    "POSTGRES_ENGINE=sqlite",
-    "POSTGRES_HOST=localhost",
-    "POSTGRES_PORT=5432",
-    "POSTGRES_USER=test",
-    "POSTGRES_PASSWORD=test",
-    "POSTGRES_DB=test",
+    "DATABASE_ENGINE=sqlite",
+    "DATABASE_HOST=localhost",
+    "DATABASE_PORT=5432",
+    "DATABASE_USER=test",
+    "DATABASE_PASSWORD=test",
+    "DATABASE_DB=test",
 ]
 
 [[tool.mypy.overrides]]

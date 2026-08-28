@@ -3,7 +3,7 @@ from sqlmodel import create_engine
 
 from app.config import settings
 
-if settings.engine == "sqlite":
+if settings.database_engine == "sqlite":
     engine = create_engine(
         settings.database_url,
         echo=True,

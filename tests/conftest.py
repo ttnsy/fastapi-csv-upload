@@ -1,5 +1,4 @@
 import logging
-import os
 from pathlib import Path
 
 import pytest
@@ -14,7 +13,7 @@ from app.main import app
 
 @pytest.fixture(scope="session", autouse=True)
 def test_setup():
-    assert settings.engine == "sqlite", (
+    assert settings.database_engine == "sqlite", (
         f"Tests must use SQLite, got engine: {settings.engine}"
     )
     logging.disable(logging.CRITICAL)
@@ -31,10 +30,6 @@ def test_setup():
 def test_engine(tmp_path_factory):
     SQLModel.metadata.create_all(engine)
     yield engine
-    engine.dispose()
-    if os.path.exists("test.db"):
-        os.remove("test.db")
-
 
 @pytest.fixture
 def session(test_engine):

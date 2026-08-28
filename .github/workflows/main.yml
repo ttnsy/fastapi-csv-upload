@@ -26,11 +26,18 @@ jobs:
 
      - name: Run Ruff (linting)
        uses: astral-sh/ruff-action@v3
+       with:
+        version: "0.15.11"
 
      - name: Run pytest (unit tests)
        env:
-        DB_PATH: test.db
-       run: uv run alembic upgrade head && uv run pytest
+        DATABASE_ENGINE: sqlite
+        DATABASE_HOST: localhost
+        DATABASE_PORT: "5432"
+        DATABASE_USER: test
+        DATABASE_PASSWORD: test
+        DATABASE_DB: test
+       run: uv run pytest
 
      - name: Run mypy (type checking)
        run: uv run mypy app/

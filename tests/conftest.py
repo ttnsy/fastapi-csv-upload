@@ -1,17 +1,21 @@
 import logging
-import os
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, SQLModel
 
+from app.config import settings
+from app.database import engine
 from app.dependencies import get_session, get_upload_dir
 from app.main import app
 
 
 @pytest.fixture(scope="session", autouse=True)
-def disable_logging():
+def test_setup():
+    assert settings.database_engine == "sqlite", (
+        f"Tests must use SQLite, got engine: {settings.engine}"
+    )
     logging.disable(logging.CRITICAL)
     yield
     logging.disable(logging.NOTSET)
@@ -24,17 +28,8 @@ def disable_logging():
 
 @pytest.fixture(scope="session")
 def test_engine(tmp_path_factory):
-    db_path = tmp_path_factory.mktemp("db") / "test.db"
-    os.environ["DB_PATH"] = str(db_path)
-    engine = create_engine(
-        f"sqlite:///{db_path}",
-        connect_args={"check_same_thread": False},
-        echo=False,
-    )
     SQLModel.metadata.create_all(engine)
     yield engine
-    db_path.unlink(missing_ok=True)
-
 
 @pytest.fixture
 def session(test_engine):

@@ -1,8 +1,5 @@
 version: "3"
 
-env:
-  DB_PATH: "database.db"
-
 tasks:
   setup:
     desc: Initial project setup
@@ -30,6 +27,6 @@ tasks:
       - "docker compose up --build"
 
   test:
-    desc: Run tests with separate DB
+    desc: Run tests locally with uv (SQLite in-memory)
     cmds:
-      - "docker compose exec backend sh -c 'DB_PATH=test.db uv run pytest -vvs'"
+      - "uv run pytest"

@@ -12,7 +12,7 @@ repos:
 
       - id: pytest
         name: pytest
-        entry: sh -c 'DB_PATH="${DB_PATH:-test.db}" uv run pytest'
+        entry: uv run pytest
         language: system
         pass_filenames: false
 

@@ -1,24 +1,32 @@
 from pathlib import Path
+from typing import Literal
 
-from pydantic import field_validator
-from pydantic_settings import BaseSettings
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 UPLOAD_DIR = Path("data")
 
-# Used to catch missing DB_PATH.
-# If this value is still set, it means DB_PATH wasn't configured.
-DEFAULT_DB_PLACEHOLDER = "__MISSING_DB_PATH__"
+
+class DatabaseSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env", extra="ignore"
+    )
+
+    database_engine: Literal["sqlite", "postgres"] = Field(default="sqlite")
+    database_host: str
+    database_port: int
+    database_user: str
+    database_password: str
+    database_db: str
+
+    @property
+    def database_url(self) -> str:
+        if self.database_engine == "sqlite":
+            return "sqlite:///:memory:"
+        return (
+            f"postgresql+psycopg://{self.database_user}:{self.database_password}"
+            f"@{self.database_host}:{self.database_port}/{self.database_db}"
+        )
 
 
-class Settings(BaseSettings):
-    db_path: str = DEFAULT_DB_PLACEHOLDER
-
-    @field_validator("db_path", mode="before")
-    @classmethod
-    def validate_db_path(cls, value):
-        if value == DEFAULT_DB_PLACEHOLDER:
-            raise ValueError("You must set DB_PATH in your environment or .env file.")
-        return value
-
-
-settings = Settings()
+settings = DatabaseSettings()

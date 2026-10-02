@@ -8,15 +8,20 @@ import pyarrow.parquet as pq
 from fastapi import HTTPException, UploadFile
 from sqlmodel import Session
 
-from app.crud import save_metadata
+from app.dependencies import SessionDep, UploadDirDep
 from app.log_config import logger
-from app.schemas import CSVMetadataCreate
-from app.utils.detectors import (
+from app.resources.datasets.crud import (
+    get_all_datasets,
+    get_metadata_by_name,
+    save_metadata,
+)
+from app.resources.datasets.detectors import (
     get_idx_date,
     get_idx_id,
     get_idx_value,
     has_header_pacsv,
 )
+from app.resources.datasets.schema import CSVMetadataCreate
 
 
 async def save_uploaded_csv(
@@ -85,4 +90,22 @@ def create_and_save_metadata(
         )
         path.unlink(missing_ok=True)
         raise HTTPException(status_code=500, detail="Failed to save metadata")
+    return metadata
+
+
+def get_dataset(stored_name: str, session: SessionDep, upload_dir: UploadDirDep):
+    metadata = get_metadata_by_name(session, stored_name)
+    if not metadata:
+        raise HTTPException(404, "Dataset not found")
+    path = (upload_dir / metadata.name_stored).with_suffix(".parquet")
+    if not path.exists():
+        logger.error(f"Metadata exists but file missing: {path}")
+        raise HTTPException(500, "Dataset file is missing")
+    return metadata, path
+
+
+def get_datasets(session: SessionDep):
+    metadata = get_all_datasets(session)
+    if not metadata:
+        raise HTTPException(404, "No datasets found")
     return metadata

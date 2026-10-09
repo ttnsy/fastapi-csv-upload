@@ -56,6 +56,39 @@ def client(session, tmp_path):
 
 
 # -------------------------------------------------------------
+# URL
+# -------------------------------------------------------------
+@pytest.fixture
+def upload_url():
+    return app.url_path_for("upload_dataset")
+
+
+@pytest.fixture
+def uploaded_dataset(client: TestClient, sample_csv_path, upload_url):
+    with sample_csv_path.open("rb") as f:
+        response = client.post(
+            upload_url,
+            files={"file": ("sample.csv", f, "text/csv")},
+        )
+    assert response.status_code == 201
+    return response.json()["metadata"]
+
+
+@pytest.fixture
+def analysis_url(uploaded_dataset):
+    return app.url_path_for(
+        "analyse_dataset", stored_name=uploaded_dataset["name_stored"]
+    )
+
+
+@pytest.fixture
+def download_url(uploaded_dataset):
+    return app.url_path_for(
+        "download_dataset", stored_name=uploaded_dataset["name_stored"]
+    )
+
+
+# -------------------------------------------------------------
 # SAMPLE CSV
 # -------------------------------------------------------------
 

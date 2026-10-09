@@ -11,7 +11,7 @@ from app.resources.datasets.service import get_dataset
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
 
-@router.get("/{stored_name}/analysis", status_code=200)
+@router.get("/{stored_name}/analysis", name="analyse_dataset")
 async def get_value_analysis(
     stored_name: str,
     params: Annotated[AnalysisParams, Query()],

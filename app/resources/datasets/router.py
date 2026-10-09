@@ -12,7 +12,7 @@ from app.resources.datasets.service import get_dataset, get_datasets, save_uploa
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
 
-@router.post("/", status_code=201)
+@router.post("/", status_code=201, name="upload_dataset")
 async def upload_csv(
     session: SessionDep,
     upload_dir: UploadDirDep,
@@ -27,19 +27,19 @@ async def upload_csv(
     return {"message": "Success", "metadata": metadata}
 
 
-@router.get("/")
+@router.get("/", name="list_datasets")
 def list_datasets(session: SessionDep):
     datasets = get_datasets(session)
     return datasets
 
 
-@router.get("/{stored_name}")
+@router.get("/{stored_name}", name="get_dataset_info")
 def get_dataset_info(stored_name: str, session: SessionDep, upload_dir: UploadDirDep):
     metadata, _ = get_dataset(stored_name, session, upload_dir)
     return metadata
 
 
-@router.get("/{stored_name}/content")
+@router.get("/{stored_name}/content", name="download_dataset")
 async def download_csv(stored_name: str, session: SessionDep, upload_dir: UploadDirDep):
     metadata, path = get_dataset(stored_name, session, upload_dir)
     sink = io.BytesIO()

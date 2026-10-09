@@ -12,7 +12,7 @@ router = APIRouter(prefix="/datasets", tags=["datasets"])
 
 
 @router.get("/{stored_name}/analysis", name="analyse_dataset")
-async def get_value_analysis(
+async def analyse_dataset(
     stored_name: str,
     params: Annotated[AnalysisParams, Query()],
     upload_dir: UploadDirDep,

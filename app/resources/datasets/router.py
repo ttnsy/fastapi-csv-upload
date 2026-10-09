@@ -13,7 +13,7 @@ router = APIRouter(prefix="/datasets", tags=["datasets"])
 
 
 @router.post("/", status_code=201, name="upload_dataset")
-async def upload_csv(
+async def upload_dataset(
     session: SessionDep,
     upload_dir: UploadDirDep,
     file: UploadFile = File(...),
@@ -33,14 +33,18 @@ def list_datasets(session: SessionDep):
     return datasets
 
 
-@router.get("/{stored_name}", name="get_dataset_info")
-def get_dataset_info(stored_name: str, session: SessionDep, upload_dir: UploadDirDep):
+@router.get("/{stored_name}", name="get_dataset_metadata")
+def get_dataset_metadata(
+    stored_name: str, session: SessionDep, upload_dir: UploadDirDep
+):
     metadata, _ = get_dataset(stored_name, session, upload_dir)
     return metadata
 
 
 @router.get("/{stored_name}/content", name="download_dataset")
-async def download_csv(stored_name: str, session: SessionDep, upload_dir: UploadDirDep):
+async def download_dataset(
+    stored_name: str, session: SessionDep, upload_dir: UploadDirDep
+):
     metadata, path = get_dataset(stored_name, session, upload_dir)
     sink = io.BytesIO()
     pacsv.write_csv(pq.read_table(path), sink)

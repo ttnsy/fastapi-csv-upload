@@ -3,7 +3,7 @@ from typing import Annotated
 import pyarrow.parquet as pq
 from fastapi import APIRouter, Query
 
-from app.dependencies import SessionDep, UploadDirDep
+from app.api.annotations import SessionDep, UploadDirDep
 from app.resources.datasets.analyses.schema import AnalysisParams
 from app.resources.datasets.analyses.service import aggregate_dataframe
 from app.resources.datasets.service import get_dataset

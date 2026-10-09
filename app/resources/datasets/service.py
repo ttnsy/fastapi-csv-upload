@@ -8,7 +8,7 @@ import pyarrow.parquet as pq
 from fastapi import HTTPException, UploadFile
 from sqlmodel import Session
 
-from app.dependencies import SessionDep, UploadDirDep
+from app.api.annotations import SessionDep, UploadDirDep
 from app.log_config import logger
 from app.resources.datasets.crud import (
     get_all_datasets,

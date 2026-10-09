@@ -5,7 +5,7 @@ import pyarrow.parquet as pq
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import Response
 
-from app.dependencies import SessionDep, UploadDirDep
+from app.api.annotations import SessionDep, UploadDirDep
 from app.log_config import logger
 from app.resources.datasets.service import get_dataset, get_datasets, save_uploaded_csv
 

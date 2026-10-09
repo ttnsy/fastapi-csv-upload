@@ -3,9 +3,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 
+from app.api.router import router as api_router
 from app.log_config import logger_telemetry
-from app.resources.datasets.analyses.router import router as analyses_router
-from app.resources.datasets.router import router as datasets_router
 
 
 @asynccontextmanager
@@ -14,9 +13,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
-app.include_router(datasets_router)
-app.include_router(analyses_router)
+app.include_router(api_router)
 
 
 @app.middleware("http")

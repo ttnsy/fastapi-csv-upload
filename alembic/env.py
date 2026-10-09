@@ -1,8 +1,10 @@
 from logging.config import fileConfig
 
+from sqlmodel import SQLModel
+
 from alembic import context
 from app.database import engine
-from app.models import CSVMetadata, SQLModel  # noqa: F401
+from app.resources.datasets.model import CSVMetadata  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

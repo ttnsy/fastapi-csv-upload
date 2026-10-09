@@ -8,9 +8,7 @@ UPLOAD_DIR = Path("data")
 
 
 class DatabaseSettings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=".env", extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_engine: Literal["sqlite", "postgres"] = Field(default="sqlite")
     database_host: str

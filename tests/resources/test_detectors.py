@@ -1,7 +1,7 @@
 import pyarrow as pa
 import pytest
 
-from app.utils.detectors import (
+from app.resources.datasets.detectors import (
     DATE_KEYS,
     ID_KEY,
     VALUE_KEY,

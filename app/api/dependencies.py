@@ -1,7 +1,6 @@
 from pathlib import Path
-from typing import Annotated, Generator
+from typing import Generator
 
-from fastapi import Depends
 from sqlmodel import Session
 
 from app.config import UPLOAD_DIR
@@ -17,7 +16,3 @@ def get_upload_dir() -> Path:
     if not UPLOAD_DIR.exists():
         raise RuntimeError(f"{UPLOAD_DIR} does not exist!")
     return UPLOAD_DIR
-
-
-SessionDep = Annotated[Session, Depends(get_session)]
-UploadDirDep = Annotated[Path, Depends(get_upload_dir)]

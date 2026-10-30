@@ -5,16 +5,16 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel
 
+from app.api.dependencies import get_session, get_upload_dir
 from app.config import settings
 from app.database import engine
-from app.dependencies import get_session, get_upload_dir
 from app.main import app
 
 
 @pytest.fixture(scope="session", autouse=True)
 def test_setup():
     assert settings.database_engine == "sqlite", (
-        f"Tests must use SQLite, got engine: {settings.engine}"
+        f"Tests must use SQLite, got engine: {settings.database_engine}"
     )
     logging.disable(logging.CRITICAL)
     yield
@@ -30,6 +30,7 @@ def test_setup():
 def test_engine(tmp_path_factory):
     SQLModel.metadata.create_all(engine)
     yield engine
+
 
 @pytest.fixture
 def session(test_engine):

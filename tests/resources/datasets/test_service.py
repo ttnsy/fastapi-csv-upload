@@ -6,10 +6,10 @@ import pyarrow.parquet as pq
 import pytest
 from fastapi import HTTPException, UploadFile
 
-from app import crud
-from app.models import CSVMetadata
-from app.schemas import CSVMetadataCreate
-from app.utils.csv_files import create_and_save_metadata, save_uploaded_csv
+from app.resources.datasets import crud
+from app.resources.datasets.model import CSVMetadata
+from app.resources.datasets.schema import CSVMetadataCreate
+from app.resources.datasets.service import create_and_save_metadata, save_uploaded_csv
 
 
 def test_create_and_save_metadata_success(
@@ -47,7 +47,7 @@ def test_create_and_save_metadata_db_failure(
     def _save_error(*a, **k):
         raise Exception("DB ERROR")
 
-    monkeypatch.setattr("app.utils.csv_files.save_metadata", _save_error)
+    monkeypatch.setattr("app.resources.datasets.service.save_metadata", _save_error)
 
     with pytest.raises(HTTPException) as exc:
         create_and_save_metadata(session, upload, parquet_path, table)

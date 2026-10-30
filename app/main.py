@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 
+from app.api.router import router as api_router
 from app.log_config import logger_telemetry
-from app.routers import analysis, csv_file
 
 
 @asynccontextmanager
@@ -13,9 +13,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
-app.include_router(csv_file.router)
-app.include_router(analysis.router)
+app.include_router(api_router)
 
 
 @app.middleware("http")

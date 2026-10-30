@@ -14,7 +14,7 @@ from app.main import app
 @pytest.fixture(scope="session", autouse=True)
 def test_setup():
     assert settings.database_engine == "sqlite", (
-        f"Tests must use SQLite, got engine: {settings.engine}"
+        f"Tests must use SQLite, got engine: {settings.database_engine}"
     )
     logging.disable(logging.CRITICAL)
     yield
